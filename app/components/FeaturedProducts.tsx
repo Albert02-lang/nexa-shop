@@ -472,12 +472,12 @@ export default function FeaturedProducts() {
 
 
                   <a
-                    href={`https://wa.me/${whatsappNumber}?text=Hola Nexa Shop, quiero solicitar información sobre: ${product.name}. ¿Me pueden confirmar disponibilidad?`}
+                    href={`https://wa.me/${whatsappNumber}?text=Hola Nexa Shop, me interesa comprar ${product.name} con precio de $${product.price} MXN. ¿Está disponible?`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block w-full rounded-2xl bg-black py-3 text-center font-bold text-white transition hover:bg-green-600"
                   >
-                    💬 Consultar por WhatsApp
+                    💬 Pedir por WhatsApp
                   </a>
 
 
