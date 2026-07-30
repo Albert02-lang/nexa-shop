@@ -2,34 +2,34 @@
 
 import { useState } from "react";
 
+import { supabase } from "../../lib/supabase";
 import { useProductStore } from "../../lib/product-store";
 
-
 export default function AddProductForm() {
-
-
-  const addProduct = useProductStore(
-    (state) => state.addProduct
-  );
-
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
   const [type, setType] = useState("");
-  const [image, setImage] = useState("");
-  const [preview, setPreview] = useState("");
+  const [gender, setGender] = useState("");
+  const [description, setDescription] = useState("");
+  const [tag, setTag] = useState("");
+  const [size, setSize] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [message, setMessage] = useState("");
 
+  const [loading, setLoading] = useState(false);
+const loadProducts = useProductStore(
+  (state) => state.loadProducts
+);
 
 
-  const handleSubmit = (
+  const handleSubmit = async (
     e: React.FormEvent
   ) => {
 
     e.preventDefault();
-
 
     if (
       name.trim() === "" ||
@@ -45,69 +45,153 @@ export default function AddProductForm() {
     }
 
 
+    try {
 
-    const newProduct = {
+      setLoading(true);
+      setMessage("");
 
-      id: Date.now(),
-
-      name,
-
-      price: Number(price),
-
-      image:
-        image !== ""
-          ? image
-          : "/images/products/default.jpg",
-
-
-      category:
-        category || "Sin categoría",
-
-
-      type:
-        type || "Sin tipo",
-
-
-      gender: "Unisex",
-
-
-      description:
-        "Producto agregado desde administración.",
-
-
-      sizes: [],
-
-
-      colors: [],
-
-
-      available: true,
-
-
-      status: "Disponible" as const,
-
-
-      tag: "Nuevo",
-
-    };
+      let imageUrl =
+        "/images/products/default.jpg";
 
 
 
-    addProduct(newProduct);
+      // SUBIR IMAGEN AL STORAGE
+
+      if (imageFile) {
+
+        const fileName =
+          `${Date.now()}-${imageFile.name}`;
+
+
+        const { error: uploadError } =
+          await supabase.storage
+            .from("products")
+            .upload(
+              fileName,
+              imageFile
+            );
+
+
+        if (uploadError) {
+
+          throw uploadError;
+
+        }
 
 
 
-    setMessage(
-      "✅ Producto agregado correctamente"
-    );
+        const { data } =
+          supabase.storage
+            .from("products")
+            .getPublicUrl(
+              fileName
+            );
 
 
-    setName("");
-    setPrice("");
-    setCategory("");
-    setType("");
-    setImage("");
-    setPreview("");
+        imageUrl =
+          data.publicUrl;
+
+      }
+
+
+
+
+
+      // GUARDAR PRODUCTO EN TABLA
+
+      const { error } =
+        await supabase
+          .from("products")
+          .insert({
+
+            name,
+
+            price:
+              Number(price),
+
+            image:
+              imageUrl,
+
+            category:
+              category || "Sin categoría",
+
+            type:
+              type || "Sin tipo",
+
+            gender:
+              gender || "Unisex",
+
+            description:
+              description ||
+              "Producto agregado desde administración.",
+
+              size:
+  size || "Única",
+
+            available:
+              true,
+
+            status:
+              "Disponible",
+
+            tag:
+              tag || "Nuevo",
+
+            stock:
+              1,
+
+            featured:
+              false,
+
+          });
+
+
+
+      if (error) {
+
+        throw error;
+
+      }
+
+      await loadProducts();
+
+
+
+      setMessage(
+        "✅ Producto guardado correctamente"
+      );
+
+
+      // LIMPIAR
+      setSize("");
+
+      setName("");
+      setPrice("");
+      setCategory("");
+      setType("");
+      setGender("");
+      setDescription("");
+      setTag("");
+      setImageFile(null);
+
+
+
+    } catch (error: any) {
+
+  console.error("ERROR COMPLETO:", error);
+  console.error("MENSAJE:", error?.message);
+  console.error("DETALLES:", error?.details);
+  console.error("HINT:", error?.hint);
+
+  setMessage(
+    error?.message ?? "❌ Error al guardar producto"
+  );
+
+} finally {
+
+      setLoading(false);
+
+    }
 
   };
 
@@ -132,12 +216,11 @@ export default function AddProductForm() {
       <div className="grid gap-4 md:grid-cols-2">
 
 
-
         <input
 
           value={name}
 
-          onChange={(e) =>
+          onChange={(e)=>
             setName(e.target.value)
           }
 
@@ -149,13 +232,11 @@ export default function AddProductForm() {
 
 
 
-
-
         <input
 
           value={price}
 
-          onChange={(e) =>
+          onChange={(e)=>
             setPrice(e.target.value)
           }
 
@@ -169,13 +250,11 @@ export default function AddProductForm() {
 
 
 
-
-
         <select
 
           value={category}
 
-          onChange={(e) =>
+          onChange={(e)=>
             setCategory(e.target.value)
           }
 
@@ -184,24 +263,25 @@ export default function AddProductForm() {
         >
 
           <option value="">
-            Selecciona una categoría
+            Categoría
           </option>
 
-          <option value="Hombre">
+          <option>
             Hombre
           </option>
 
-          <option value="Mujer">
+          <option>
             Mujer
           </option>
 
-          <option value="Niños">
+          <option>
             Niños
           </option>
 
-          <option value="Accesorios">
+          <option>
             Accesorios
           </option>
+
 
         </select>
 
@@ -213,7 +293,7 @@ export default function AddProductForm() {
 
           value={type}
 
-          onChange={(e) =>
+          onChange={(e)=>
             setType(e.target.value)
           }
 
@@ -222,79 +302,136 @@ export default function AddProductForm() {
         >
 
           <option value="">
-            Selecciona tipo de producto
+            Tipo
           </option>
 
-          <option value="Playera">
+          <option>
             Playera
           </option>
 
-          <option value="Sudadera">
+          <option>
             Sudadera
           </option>
 
-          <option value="Jeans">
+          <option>
             Jeans
           </option>
 
-          <option value="Chamarra">
+          <option>
             Chamarra
           </option>
 
-          <option value="Calzado">
+          <option>
             Calzado
-          </option>
-
-          <option value="Accesorio">
-            Accesorio
           </option>
 
         </select>
 
 
 
+        <select
+
+          value={gender}
+
+          onChange={(e)=>
+            setGender(e.target.value)
+          }
+
+          className="rounded-xl border p-3 text-black"
+
+        >
+
+          <option value="">
+            Género
+          </option>
+
+          <option>
+            Hombre
+          </option>
+
+          <option>
+            Mujer
+          </option>
+
+          <option>
+            Niños
+          </option>
+
+          <option>
+            Unisex
+          </option>
+
+        </select>
+        <select
+
+  value={size}
+
+  onChange={(e)=>
+    setSize(e.target.value)
+  }
+
+  className="rounded-xl border p-3 text-black"
+
+>
+
+  <option value="">
+    Talla
+  </option>
+
+  <option>
+    CH
+  </option>
+
+  <option>
+    M
+  </option>
+
+  <option>
+    G
+  </option>
+
+  <option>
+    XL
+  </option>
+
+  <option>
+    28
+  </option>
+
+  <option>
+    30
+  </option>
+
+  <option>
+    32
+  </option>
+
+  <option>
+    34
+  </option>
+
+  <option>
+    Única
+  </option>
+
+</select>
 
 
-        <div>
-
-          <label className="mb-2 block font-semibold text-black">
-            📷 Seleccionar imagen
-          </label>
 
 
-          <input
+        <input
 
-            type="file"
+          value={tag}
 
-            accept="image/*"
+          onChange={(e)=>
+            setTag(e.target.value)
+          }
 
-            onChange={(e) => {
+          placeholder="Etiqueta (Nuevo, Oferta...)"
 
+          className="rounded-xl border p-3 text-black"
 
-              const file =
-                e.target.files?.[0];
-
-
-              if (file) {
-
-                const url =
-                  URL.createObjectURL(file);
-
-
-                setImage(url);
-
-                setPreview(url);
-
-              }
-
-
-            }}
-
-            className="w-full rounded-xl border p-3 text-black"
-
-          />
-
-        </div>
+        />
 
 
       </div>
@@ -302,30 +439,50 @@ export default function AddProductForm() {
 
 
 
+      <textarea
 
-      {preview && (
+        value={description}
 
-        <div className="mt-6">
+        onChange={(e)=>
+          setDescription(e.target.value)
+        }
 
-          <p className="mb-2 font-semibold text-black">
-            Vista previa:
-          </p>
+        placeholder="Descripción"
+
+        className="mt-4 w-full rounded-xl border p-3 text-black"
+
+      />
 
 
-          <img
 
-            src={preview}
 
-            alt="Vista previa"
 
-            className="h-40 w-40 rounded-xl object-cover"
+      <div className="mt-4">
 
-          />
+        <label className="font-bold text-black">
+          Imagen del producto
+        </label>
 
-        </div>
 
-      )}
+        <input
 
+          type="file"
+
+          accept="image/*"
+
+          onChange={(e)=>
+
+            setImageFile(
+              e.target.files?.[0] || null
+            )
+
+          }
+
+          className="mt-2 w-full rounded-xl border p-3 text-black"
+
+        />
+
+      </div>
 
 
 
@@ -333,13 +490,15 @@ export default function AddProductForm() {
 
       <button
 
-        type="submit"
+        disabled={loading}
 
-        className="mt-6 rounded-xl bg-blue-600 px-6 py-3 font-bold text-white transition hover:bg-blue-700"
+        className="mt-6 rounded-xl bg-blue-600 px-6 py-3 font-bold text-white"
 
       >
 
-        Guardar producto
+        {loading
+          ? "Guardando..."
+          : "Guardar producto"}
 
       </button>
 
@@ -347,10 +506,9 @@ export default function AddProductForm() {
 
 
 
-
       {message && (
 
-        <p className="mt-4 font-semibold text-blue-600">
+        <p className="mt-4 font-bold text-blue-600">
 
           {message}
 

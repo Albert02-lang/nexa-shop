@@ -80,12 +80,12 @@ export default function ProductPurchase({
 
 
       <a
-        href={`https://wa.me/${whatsappNumber}?text=Hola Nexa Shop, me interesa reservar ${product.name}`}
+        href={`https://wa.me/${whatsappNumber}?text=Hola Nexa Shop, me interesa comprar ${product.name} con precio de $${product.price} MXN. ¿Está disponible?`}
         target="_blank"
         rel="noopener noreferrer"
-        className="block rounded-xl bg-black py-4 text-center font-bold text-white transition hover:bg-green-600"
+        className="block rounded-xl bg-green-600 py-4 text-center font-bold text-white transition hover:bg-green-700"
       >
-        ⭐ Reservar esta pieza por WhatsApp
+        💬 Pedir por WhatsApp
       </a>
 
 

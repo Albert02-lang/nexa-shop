@@ -8,6 +8,7 @@ export interface Product {
   type: string;
   gender: string;
   description: string;
+  size?: string;
   sizes: string[];
   colors: string[];
   available: boolean;

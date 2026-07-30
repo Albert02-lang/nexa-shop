@@ -4,7 +4,6 @@ import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-import { products } from "../../data/products";
 import { useCartStore } from "../../lib/cart-store";
 import { useProductStore } from "../../lib/product-store";
 
@@ -79,13 +78,18 @@ export default function FeaturedProducts() {
   const productsAdded = useProductStore(
     (state) => state.productsAdded
   );
+  console.log("Productos desde store:", productsAdded);
+
+  const loadProducts = useProductStore(
+  (state) => state.loadProducts
+);
+
+useEffect(() => {
+  loadProducts();
+}, [loadProducts]);
 
 
-
-  const allProducts = [
-  ...products,
-  ...productsAdded,
-].map((product) => ({
+const allProducts = productsAdded.map((product) => ({
 
   ...product,
 

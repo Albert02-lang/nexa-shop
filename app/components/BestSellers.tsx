@@ -1,16 +1,32 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 
-import { products } from "../../data/products";
+import { useEffect } from "react";
+import { useProductStore } from "../../lib/product-store";
 
 
 export default function BestSellers() {
 
+const productsAdded = useProductStore(
+  (state) => state.productsAdded
+);
 
-  const bestProducts = products.slice(0, 4);
+
+const loadProducts = useProductStore(
+  (state) => state.loadProducts
+);
 
 
+useEffect(() => {
 
+  loadProducts();
+
+}, [loadProducts]);
+
+
+const bestProducts = productsAdded.slice(0, 4);
   return (
 
     <section className="bg-gray-50 py-20">

@@ -5,15 +5,18 @@ import { products } from "../../../data/products";
 import ProductStatus from "../../components/ProductStatus";
 
 
-export default function CategoryPage({
+export default async function CategoryPage({
   params,
 }: {
-  params: { category: string };
+  params: Promise<{
+    category: string;
+  }>;
 }) {
 
+  const { category } = await params;
 
   const categoryName = decodeURIComponent(
-    params.category
+    category
   );
 
 

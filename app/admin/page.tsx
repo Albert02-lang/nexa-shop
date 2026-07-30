@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-import { products, type Product } from "../../data/products";
+import type { Product } from "../../data/products";
 import { useProductStore } from "../../lib/product-store";
 
 import AddProductForm from "../components/AddProductForm";
 import AdminDashboard from "../components/AdminDashboard";
-import EditProductModal from "../components/EditProductModal";
+import EditProductModal from "../components/EditProductModal";;
+import AdminProductCard from "../components/AdminProductCard";
 
 export default function AdminPage() {
 
@@ -85,11 +86,18 @@ export default function AdminPage() {
   (state) => state.productsAdded
 );
 
+const loadProducts = useProductStore(
+  (state) => state.loadProducts
+);
+useEffect(() => {
+
+  loadProducts();
+
+}, [loadProducts]);
+
 const allProducts = [
-  ...products,
   ...productsAdded,
 ];
-
 
 
   const updateStatus = useProductStore(
@@ -364,221 +372,28 @@ const soldProducts =
 
 
 
-          {sortedProducts.map((product) => {
-            
-            const currentStatus =
-              productStatus[product.id] ||
-              product.status ||
-              "Disponible";
-
-
-
-
-
-            return (
-
-
-
-              <div
-                key={product.id}
-                className="overflow-hidden rounded-3xl bg-white shadow-lg"
-              >
-
-
-
-
-
-                <div className="relative h-72">
-
-
-
-                  <Image
-                    src={
-                      typeof product.image === "string" &&
-                      product.image.trim() !== ""
-                        ? product.image
-                        : "/images/products/default.jpg"
-                    }
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
-
-
-
-
-
-                  <span
-                    className={`absolute right-4 top-4 rounded-full px-4 py-2 text-sm font-bold text-white ${
-                      currentStatus === "Disponible"
-                        ? "bg-green-600"
-                        : currentStatus === "En trato"
-                        ? "bg-yellow-500"
-                        : "bg-red-600"
-                    }`}
-                  >
-
-                    {currentStatus}
-
-                  </span>
-
-
-
-
-                </div>
-
-
-
-
-
-
-
-
-
-                <div className="p-6">
-
-
-
-
-
-                  <p className="text-sm font-bold uppercase text-blue-600">
-                    {product.category}
-                  </p>
-
-
-
-
-
-                  <h2 className="mt-2 text-2xl font-black text-black">
-                    {product.name}
-                  </h2>
-
-
-
-
-
-                  <p className="mt-3 text-xl font-bold text-black">
-                    ${product.price} MXN
-                  </p>
-
-
-
-
-
-
-
-
-                  <div className="mt-6 space-y-3">
-
-
-
-
-
-
-                    <button
-                      onClick={() =>
-                        updateStatus(
-                          product.id,
-                          "Disponible"
-                        )
-                      }
-                      className="w-full rounded-xl bg-green-600 py-3 font-bold text-white"
-                    >
-
-                      🟢 Disponible
-
-                    </button>
-
-
-
-
-
-
-
-
-                    <button
-                      onClick={() =>
-                        updateStatus(
-                          product.id,
-                          "En trato"
-                        )
-                      }
-                      className="w-full rounded-xl bg-yellow-500 py-3 font-bold text-white"
-                    >
-
-                      🟡 En trato
-
-                    </button>
-
-
-
-
-
-
-
-<button
-  onClick={() =>
-    updateStatus(
-      product.id,
-      "Vendido"
-    )
-  }
-  className="w-full rounded-xl bg-red-600 py-3 font-bold text-white"
->
-  🔴 Vendido
-</button>
-
-<button
-  onClick={() => {
-    console.log("clic editar", product);
-    setSelectedProduct(product);
-  }}
-  className="w-full rounded-xl bg-blue-600 py-3 font-bold text-white"
->
-  ✏️ Editar producto
-</button>
-
-<button
-  onClick={() => {
-    const confirmDelete = confirm(
-      "¿Eliminar este producto?"
-    );
-
-    if (confirmDelete) {
-      deleteProduct(product.id);
+         {sortedProducts.map((product) => (
+  <AdminProductCard
+    key={product.id}
+    product={product}
+    currentStatus={
+      productStatus[product.id] ||
+      product.status ||
+      "Disponible"
     }
-  }}
-  className="w-full rounded-xl bg-gray-900 py-3 font-bold text-white"
->
-  🗑️ Eliminar
-</button>
+    onStatusChange={updateStatus}
+    onEdit={setSelectedProduct}
+    onDelete={(id) => {
+      const confirmDelete = confirm(
+        "¿Eliminar este producto?"
+      );
 
-
-
-
-
-
-
-                  </div>
-
-
-
-
-
-                </div>
-
-
-
-
-
-              </div>
-
-
-
-            );
-
-
-          })}
+      if (confirmDelete) {
+        deleteProduct(id);
+      }
+    }}
+  />
+))}
 
 
 

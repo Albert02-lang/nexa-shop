@@ -1,7 +1,6 @@
 import Image from "next/image";
 
-import { products } from "../../../data/products";
-
+import { supabase } from "../../../lib/supabase";
 import ProductStatusClient from "../../components/ProductStatusClient";
 import ProductPurchase from "../../components/ProductPurchase";
 
@@ -16,11 +15,36 @@ export default async function ProductPage({
   const { id } = await params;
 
 
-  const product = products.find(
-    (item) => item.id === Number(id)
-  );
+const { data, error } = await supabase
+  .from("products")
+  .select("*")
+  .eq("id", Number(id))
+  .single();
+
+  console.log("===== PRUEBA PRODUCTO =====");
+console.log("ID:", id);
+console.log("DATA:", JSON.stringify(data, null, 2));
+console.log("ERROR:", error);
+
+console.log("Producto desde Supabase:", data);
+console.log("Error Supabase:", error);
 
 
+const product = data && {
+  id: data.id,
+  name: data.name,
+  price: data.price,
+  image: data.image,
+  category: data.category,
+  gender: data.gender,
+  description: data.description,
+  size: data.size,
+  sizes: data.sizes ?? [],
+  colors: data.colors ?? [],
+  available: data.available,
+  status: data.status ?? "Disponible",
+  tag: data.tag,
+};
 
   if (!product) {
 
@@ -62,16 +86,12 @@ export default async function ProductPage({
 
 
               <Image
-
-                src={product.image}
-
-                alt={product.name}
-
-                fill
-
-                className="object-cover transition duration-500 hover:scale-105"
-
-              />
+  src={product.image || "/images/logo.png"}
+  alt={product.name}
+  fill
+  sizes="(max-width: 768px) 100vw, 50vw"
+  className="object-cover transition duration-500 hover:scale-105"
+/>
 
 
             </div>
@@ -277,7 +297,7 @@ export default async function ProductPage({
 
                   <span className="ml-2 font-semibold text-black">
 
-                    {product.sizes[0] || "Única"}
+                   {product.size || product.sizes?.[0] || "Única"}
 
                   </span>
 

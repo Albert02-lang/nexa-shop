@@ -1,20 +1,29 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { products } from "../../data/products";
+import { useProductStore } from "../../lib/product-store";
 
 
 export default function NewArrivals() {
 
+  const productsAdded = useProductStore(
+    (state) => state.productsAdded
+  );
+  console.log("Productos nuevos desde Supabase:", productsAdded);
 
-  const newProducts = products.filter(
-    (product) =>
-      product.tag?.includes("Nuevo")
+  const loadProducts = useProductStore(
+    (state) => state.loadProducts
   );
 
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
+
+const newProducts = productsAdded.slice(0,4);
 
   return (
 
