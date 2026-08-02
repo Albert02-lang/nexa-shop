@@ -22,6 +22,12 @@ export default function AdminProductCard({
   onEdit,
   onDelete,
 }: AdminProductCardProps) {
+  console.log("PRODUCTO ADMIN", {
+  id: product.id,
+  tipo: typeof product.id,
+  nombre: product.name,
+  status: product.status,
+});
   return (
     <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
       <div className="relative h-72">
@@ -88,15 +94,21 @@ export default function AdminProductCard({
 
           <select
             value={currentStatus}
-            onChange={(e) =>
-              onStatusChange(
-                product.id,
-                e.target.value as
-                  | "Disponible"
-                  | "En trato"
-                  | "Vendido"
-              )
-            }
+          onChange={(e) => {
+  console.log("CAMBIANDO", {
+    id: product.id,
+    tipo: typeof product.id,
+    nuevoEstado: e.target.value,
+  });
+
+  onStatusChange(
+    product.id,
+    e.target.value as
+      | "Disponible"
+      | "En trato"
+      | "Vendido"
+  );
+}}
             className="w-full rounded-xl border border-gray-300 bg-white p-3 font-semibold text-black shadow-sm outline-none transition focus:border-blue-500"
           >
             <option value="Disponible">

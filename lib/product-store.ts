@@ -1,441 +1,412 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 import type { Product } from "../data/products";
+
 import { supabase } from "./supabase";
 
 
 interface ProductStore {
+
+  productsAdded: Product[];
 
   productStatus: Record<
     number,
     "Disponible" | "En trato" | "Vendido"
   >;
 
-  productsAdded: Product[];
-
-
-  updateStatus: (
-    id: number,
-    status: "Disponible" | "En trato" | "Vendido"
-  ) => Promise<void>;
-
-
-  addProduct: (
-    product: Product
-  ) => void;
-
-
-  updateProduct: (
-    product: Product
-  ) => void;
-
-
-  deleteProduct: (
-    id: number
-  ) => void;
-
-
   loadProducts: () => Promise<void>;
 
+  updateStatus: (
+    id:number,
+    status:
+      | "Disponible"
+      | "En trato"
+      | "Vendido"
+  ) => Promise<void>;
 
-  syncStorage: () => void;
+  addProduct: (
+    product:Product
+  ) => Promise<void>;
+
+  updateProduct: (
+    id:number,
+    product:Partial<Product>
+  ) => Promise<void>;
+
+  deleteProduct: (
+    id:number
+  ) => Promise<void>;
 
 }
+
+
+
+function mapProduct(item:any):Product {
+
+  return {
+
+    id:item.id,
+
+    name:item.name ?? "",
+
+    price:item.price ?? 0,
+
+    oldPrice:item.oldPrice ?? undefined,
+
+    image:item.image ?? "",
+
+    category:item.category ?? "",
+
+    type:item.type ?? "",
+
+    gender:item.gender ?? "",
+
+    description:item.description ?? "",
+
+    size:item.size ?? "",
+
+    sizes:item.sizes ?? [],
+
+    colors:item.colors ?? [],
+
+    available:item.available ?? true,
+
+    status:item.status ?? "Disponible",
+
+    tag:item.tag ?? undefined,
+
+    stock:item.stock ?? undefined,
+
+  };
+
+}
+
 
 
 
 export const useProductStore =
-  create<ProductStore>()(
-    persist(
-
-      (set) => ({
-
-        productStatus: {},
-
-        productsAdded: [],
+create<ProductStore>((set)=>({
 
 
-
-        loadProducts: async () => {
-
-
-          const { data, error } =
-            await supabase
-              .from("products")
-              .select("*")
-              .order("id", {
-                ascending: false,
-              });
+productsAdded:[],
 
 
-if (error) {
+productStatus:{},
 
-  console.error(
-    "Error cargando productos:",
-    error
-  );
 
-  return;
 
-}
 
-if (data) {
+loadProducts:async()=>{
 
-  set({
 
-    productsAdded:
-      data.map((product) => ({
+const {
+data,
+error
+}=await supabase
+.from("products")
+.select("*")
+.order("id",{ascending:false});
 
-        ...product,
 
-        status:
-          product.status ??
-          "Disponible",
 
-      })),
+if(error){
 
-    productStatus:
-      Object.fromEntries(
+console.error(
+"Error cargando productos:",
+error
+);
 
-        data.map((product) => [
-
-          product.id,
-
-          product.status ??
-          "Disponible",
-
-        ])
-
-      ),
-
-  });
+return;
 
 }
+
+
+
+const products =
+(data ?? []).map(mapProduct);
+
+
+
+const statusMap =
+products.reduce(
+(acc,product)=>{
+
+acc[product.id]=product.status;
+
+return acc;
+
+},
+{} as Record<
+number,
+"Disponible"|"En trato"|"Vendido"
+>
+);
+
+
+
+set({
+
+productsAdded:products,
+
+productStatus:statusMap
+
+});
+
 
 },
 
 
 
 
-        updateStatus: async (
-          id,
-          status
-        ) => {
 
-
-          const { error } =
-            await supabase
-              .from("products")
-              .update({
-                status,
-              })
-              .eq("id", id);
-
-
-
-          if (error) {
-
-            console.error(
-              "Error actualizando estado:",
-              error
-            );
-
-            return;
-
-          }
-
-
-
-          set((state) => ({
-
-            productStatus: {
-
-              ...state.productStatus,
-
-              [id]: status,
-
-            },
-
-
-            productsAdded:
-
-              state.productsAdded.map(
-                (product) =>
-
-                  product.id === id
-
-                    ? {
-                        ...product,
-                        status,
-                      }
-
-                    : product
-
-              ),
-
-          }));
-
-
-
-
-          if (
-            typeof window !== "undefined"
-          ) {
-
-            window.dispatchEvent(
-              new Event(
-                "product-status-change"
-              )
-            );
-
-          }
-
-
-        },
-
-
-
-
-
-
-        addProduct: (
-          product
-        ) => {
-
-
-          set((state) => ({
-
-            productsAdded: [
-
-              product,
-
-              ...state.productsAdded,
-
-            ],
-
-
-            productStatus: {
-
-              ...state.productStatus,
-
-              [product.id]:
-                product.status ??
-                "Disponible",
-
-            },
-
-          }));
-
-
-        },
-
-
-
-
-
-
-        updateProduct: (
-          product
-        ) => {
-
-
-          set((state) => ({
-
-            productsAdded:
-
-              state.productsAdded.map(
-
-                (item) =>
-
-                  item.id === product.id
-
-                    ? product
-
-                    : item
-
-              ),
-
-
-          }));
-
-
-        },
-
-
-
-
-
-
-        deleteProduct: (
-          id
-        ) => {
-
-
-          set((state) => ({
-
-            productsAdded:
-
-              state.productsAdded.filter(
-
-                (product) =>
-
-                  product.id !== id
-
-              ),
-
-
-          }));
-
-
-
-
-          if (
-            typeof window !== "undefined"
-          ) {
-
-
-            localStorage.setItem(
-              "nexa-shop-refresh",
-              Date.now().toString()
-            );
-
-
-
-            window.dispatchEvent(
-              new Event(
-                "product-status-change"
-              )
-            );
-
-
-          }
-
-
-        },
-
-
-
-
-
-
-        syncStorage: () => {
-
-
-          if (
-            typeof window === "undefined"
-          ) {
-
-            return;
-
-          }
-
-
-
-
-          const saved =
-            localStorage.getItem(
-              "nexa-shop-products"
-            );
-
-
-
-
-          if (saved) {
-
-
-            try {
-
-
-              const data =
-                JSON.parse(saved);
-
-
-
-              set({
-
-                productStatus:
-
-                  data.state?.productStatus ??
-                  {},
-
-
-
-                productsAdded:
-
-                  data.state?.productsAdded ??
-                  [],
-
-
-              });
-
-
-
-            } catch (error) {
-
-
-              console.error(
-                "Error sincronizando productos",
-                error
-              );
-
-
-            }
-
-
-          }
-
-
-        },
-
-
-
-
-      }),
-
-
-
-      {
-
-
-        name:
-          "nexa-shop-products",
-
-
-
-        onRehydrateStorage:
-          () => {
-
-
-            return () => {
-
-
-              if (
-                typeof window !== "undefined"
-              ) {
-
-
-                window.dispatchEvent(
-
-                  new Event(
-                    "product-status-change"
-                  )
-
-                );
-
-
-              }
-
-
-            };
-
-
-          },
-
-
-      }
-
-
-    )
-
+updateStatus: async (
+  id,
+  status
+) => {
+
+  console.log(
+    "ACTUALIZANDO ESTADO:",
+    {
+      id,
+      status,
+    }
   );
+
+
+  const {
+    data,
+    error,
+  } = await supabase
+    .from("products")
+    .update({
+      status,
+      available: status === "Disponible",
+    })
+    .eq("id", id)
+    .select("*");
+
+
+
+  console.log(
+    "RESPUESTA UPDATE:",
+    data
+  );
+
+
+  console.log(
+    "ERROR UPDATE:",
+    error
+  );
+
+
+
+  if(error){
+
+    console.error(
+      "Error actualizando estado:",
+      error
+    );
+
+    return;
+
+  }
+
+
+
+  if(!data || data.length === 0){
+
+    console.error(
+      "No encontró producto con ID:",
+      id
+    );
+
+    return;
+
+  }
+
+
+
+  await useProductStore
+    .getState()
+    .loadProducts();
+
+
+
+  if(typeof window !== "undefined"){
+
+    window.dispatchEvent(
+      new Event(
+        "product-status-change"
+      )
+    );
+
+  }
+
+
+},
+
+
+
+addProduct:async(product)=>{
+
+
+const {
+data,
+error
+}=await supabase
+.from("products")
+.insert({
+
+name:product.name,
+
+price:product.price,
+
+image:product.image,
+
+category:product.category,
+
+type:product.type,
+
+gender:product.gender,
+
+description:product.description,
+
+sizes:product.sizes,
+
+colors:product.colors,
+
+available:product.available,
+
+status:product.status,
+
+tag:product.tag
+
+})
+.select()
+.single();
+
+
+
+if(error){
+
+console.error(
+"Error agregando:",
+error
+);
+
+return;
+
+}
+
+
+
+if(data){
+
+set((state)=>({
+
+productsAdded:[
+mapProduct(data),
+...state.productsAdded
+]
+
+
+}));
+
+}
+
+
+},
+
+
+
+
+
+
+updateProduct:async(
+id,
+product
+)=>{
+
+
+const {
+error
+}=await supabase
+.from("products")
+.update(product)
+.eq(
+"id",
+id
+);
+
+
+
+if(error){
+
+console.error(
+"Error actualizando:",
+error
+);
+
+return;
+
+}
+
+
+
+await useProductStore
+.getState()
+.loadProducts();
+
+
+},
+
+
+
+
+
+
+deleteProduct:async(id)=>{
+
+
+const {
+error
+}=await supabase
+.from("products")
+.delete()
+.eq(
+"id",
+id
+);
+
+
+
+if(error){
+
+console.error(
+"Error eliminando:",
+error
+);
+
+return;
+
+}
+
+
+
+set((state)=>({
+
+productsAdded:
+state.productsAdded.filter(
+(product)=>
+product.id!==id
+)
+
+}));
+
+
+
+}
+
+
+
+}));

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { products } from "../../../data/products";
+import { supabase } from "../../../lib/supabase";
 import ProductStatus from "../../components/ProductStatus";
 
 
@@ -16,16 +16,18 @@ export default async function CategoryPage({
   const { category } = await params;
 
   const categoryName = decodeURIComponent(
-    category
-  );
+  category
+);
 
 
 
-  const categoryProducts = products.filter(
-    (product) =>
-      product.gender === categoryName
-  );
+const { data } = await supabase!
+  .from("products")
+  .select("*")
+  .eq("gender", categoryName);
 
+
+const categoryProducts = data ?? [];
 
 
   return (

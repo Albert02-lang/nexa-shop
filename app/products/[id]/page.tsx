@@ -13,8 +13,13 @@ export default async function ProductPage({
 
 
   const { id } = await params;
+if (!supabase) {
+  return null;
+}
 
-
+if (!supabase) {
+  return null;
+}
 const { data, error } = await supabase
   .from("products")
   .select("*")

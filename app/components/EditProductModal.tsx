@@ -1,54 +1,64 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import { Product } from "../../data/products";
+
+import type { Product } from "../../data/products";
+
 import { useProductStore } from "../../lib/product-store";
 
+
 interface EditProductModalProps {
+
   product: Product | null;
+
   onClose: () => void;
+
 }
 
+
+
 export default function EditProductModal({
+
   product,
+
   onClose,
+
 }: EditProductModalProps) {
 
 
-  const updateProduct = useProductStore(
-    (state) => state.updateProduct
-  );
+  const updateProduct =
+    useProductStore(
+      (state) => state.updateProduct
+    );
 
 
-  const [name, setName] = useState(
-    product?.name || ""
-  );
+
+  const [name, setName] =
+    useState("");
+
+  const [price, setPrice] =
+    useState(0);
+
+  const [category, setCategory] =
+    useState("");
+
+  const [description, setDescription] =
+    useState("");
+
+  const [image, setImage] =
+    useState("");
+
+  const [tag, setTag] =
+    useState("");
 
 
-  const [price, setPrice] = useState(
-    product?.price || 0
-  );
 
-
-  const [category, setCategory] = useState(
-    product?.category || ""
-  );
-
-
-  const [description, setDescription] = useState(
-    product?.description || ""
-  );
-
-  const [image, setImage] = useState(
-  product?.image || ""
-);
-
-
-const [tag, setTag] = useState(
-  product?.tag || ""
-);
   useEffect(() => {
 
-  if (product) {
+
+    if (!product) return;
+
+
 
     setName(product.name);
 
@@ -57,48 +67,63 @@ const [tag, setTag] = useState(
     setCategory(product.category);
 
     setDescription(product.description);
-    
+
     setImage(product.image);
 
-    setTag(product.tag || "");
+    setTag(product.tag ?? "");
+
+
+
+  }, [product]);
+
+
+
+
+  if (!product) {
+
+    return null;
 
   }
 
-}, [product]);
-
-
-if (!product) {
-  return null;
-}
-
-console.log("Producto seleccionado:", product);
 
 
 
-  const handleSave = () => {
-
-  updateProduct({
-
-    ...product,
-
-    name,
-
-    price,
-
-    category,
-
-    description,
-
-    image,
-
-    tag,
-
-  });
+  const handleSave = async () => {
 
 
-  onClose();
 
-};
+    await updateProduct(
+
+      product.id,
+
+      {
+
+
+        name,
+
+        price,
+
+        category,
+
+        description,
+
+        image,
+
+        tag,
+
+      }
+
+
+    );
+
+
+
+    onClose();
+
+
+  };
+
+
 
 
 
@@ -110,224 +135,212 @@ console.log("Producto seleccionado:", product);
 <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl">
 
 
-        <h2 className="mb-6 text-3xl font-black text-black">
-          Editar producto
-        </h2>
+<h2 className="mb-6 text-3xl font-black text-black">
+Editar producto
+</h2>
 
 
 
-        <div className="space-y-5">
 
+<div className="space-y-5">
 
-
-          <div>
-
-            <label className="mb-2 block font-semibold text-black">
-              Nombre
-            </label>
-
-
-            <input
-
-              value={name}
-
-              onChange={(e) =>
-                setName(e.target.value)
-              }
-
-              className="w-full rounded-xl border p-3 text-black"
-
-            />
-
-          </div>
-
-
-
-
-          <div>
-
-            <label className="mb-2 block font-semibold text-black">
-              Precio
-            </label>
-
-
-            <input
-
-              value={price}
-
-              type="number"
-
-              onChange={(e) =>
-                setPrice(Number(e.target.value))
-              }
-
-              className="w-full rounded-xl border p-3 text-black"
-
-            />
-
-          </div>
-
-
-
-
-
-          <div>
-
-            <label className="mb-2 block font-semibold text-black">
-              Categoría
-            </label>
-
-
-            <input
-
-              value={category}
-
-              onChange={(e) =>
-                setCategory(e.target.value)
-              }
-
-              className="w-full rounded-xl border p-3 text-black"
-
-            />
-
-          </div>
-
-
-
-
-
-          <div>
-
-            <label className="mb-2 block font-semibold text-black">
-              Descripción
-            </label>
-
-
-            <textarea
-
-              value={description}
-
-              onChange={(e) =>
-                setDescription(e.target.value)
-              }
-
-              className="w-full rounded-xl border p-3 text-black"
-
-            />
-
-          </div>
-
-          <div>
-
-  <label className="mb-2 block font-semibold text-black">
-    Imagen del producto
-  </label>
-
-
-  <input
-
-    type="file"
-
-    accept="image/*"
-
-    onChange={(e) => {
-
-      const file =
-        e.target.files?.[0];
-
-
-      if(file){
-
-        const url =
-          URL.createObjectURL(file);
-
-        setImage(url);
-
-      }
-
-    }}
-
-    className="w-full rounded-xl border p-3 text-black"
-
-  />
-
-</div>
 
 <div>
 
-  <label className="mb-2 block font-semibold text-black">
-    Etiqueta
-  </label>
+<label className="mb-2 block font-semibold text-black">
+Nombre
+</label>
 
 
-  <input
+<input
 
-    value={tag}
+value={name}
 
-    onChange={(e) =>
-      setTag(e.target.value)
-    }
+onChange={(e)=>
+setName(e.target.value)
+}
 
-    placeholder="Ejemplo: Nuevo, Oferta, Exclusivo"
+className="w-full rounded-xl border p-3 text-black"
 
-    className="w-full rounded-xl border p-3 text-black"
-
-  />
+/>
 
 </div>
 
 
 
-        </div>
+
+<div>
+
+<label className="mb-2 block font-semibold text-black">
+Precio
+</label>
+
+
+<input
+
+type="number"
+
+value={price}
+
+onChange={(e)=>
+setPrice(
+Number(e.target.value)
+)
+}
+
+className="w-full rounded-xl border p-3 text-black"
+
+/>
+
+</div>
+
+
+
+
+<div>
+
+<label className="mb-2 block font-semibold text-black">
+Categoría
+</label>
+
+
+<input
+
+value={category}
+
+onChange={(e)=>
+setCategory(e.target.value)
+}
+
+className="w-full rounded-xl border p-3 text-black"
+
+/>
+
+</div>
+
+
+
+
+<div>
+
+<label className="mb-2 block font-semibold text-black">
+Descripción
+</label>
+
+
+<textarea
+
+value={description}
+
+onChange={(e)=>
+setDescription(e.target.value)
+}
+
+className="w-full rounded-xl border p-3 text-black"
+
+/>
+
+</div>
+
+
+
+
+<div>
+
+<label className="mb-2 block font-semibold text-black">
+URL de imagen
+</label>
+
+
+<input
+
+value={image}
+
+onChange={(e)=>
+setImage(e.target.value)
+}
+
+className="w-full rounded-xl border p-3 text-black"
+
+/>
+
+</div>
+
+
+
+
+<div>
+
+<label className="mb-2 block font-semibold text-black">
+Etiqueta
+</label>
+
+
+<input
+
+value={tag}
+
+onChange={(e)=>
+setTag(e.target.value)
+}
+
+placeholder="Nuevo, Oferta, Exclusivo"
+
+className="w-full rounded-xl border p-3 text-black"
+
+/>
+
+</div>
+
+
+
+</div>
 
 
 
 
 
-        <div className="mt-8 flex justify-end gap-4">
+<div className="mt-8 flex justify-end gap-4">
+
+
+<button
+
+onClick={onClose}
+
+className="rounded-xl bg-gray-500 px-6 py-3 font-bold text-white"
+
+>
+
+Cancelar
+
+</button>
 
 
 
-          <button
+<button
 
-            onClick={onClose}
+onClick={handleSave}
 
-            className="rounded-xl bg-gray-500 px-6 py-3 font-bold text-white"
+className="rounded-xl bg-blue-600 px-6 py-3 font-bold text-white"
 
-          >
+>
 
-            Cancelar
+Guardar cambios
 
-          </button>
-
-
+</button>
 
 
 
-          <button
-
-            onClick={handleSave}
-
-            className="rounded-xl bg-blue-600 px-6 py-3 font-bold text-white"
-
-          >
-
-            Guardar cambios
-
-          </button>
+</div>
 
 
 
-        </div>
+</div>
 
 
+</div>
 
+);
 
-      </div>
-
-
-    </div>
-
-  );
 
 }

@@ -1,39 +1,76 @@
 "use client";
 
 import { useEffect } from "react";
+
 import { useProductStore } from "../../lib/product-store";
+
 
 
 export default function ProductSync() {
 
+
+
+  const loadProducts =
+    useProductStore(
+      (state) => state.loadProducts
+    );
+
+
+
+
   useEffect(() => {
 
-    const sync = () => {
 
-      useProductStore.persist.rehydrate();
+
+    const syncProducts = async () => {
+
+
+      await loadProducts();
+
 
     };
 
 
+
+
+
     window.addEventListener(
-      "storage",
-      sync
+
+      "product-status-change",
+
+      syncProducts
+
     );
+
+
+
 
 
     return () => {
 
+
+
       window.removeEventListener(
-        "storage",
-        sync
+
+        "product-status-change",
+
+        syncProducts
+
       );
+
 
     };
 
 
-  }, []);
+
+  },[loadProducts]);
+
+
+
+
 
 
   return null;
+
 
 }

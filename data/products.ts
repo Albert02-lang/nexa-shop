@@ -14,6 +14,7 @@ export interface Product {
   available: boolean;
   status: "Disponible" | "En trato" | "Vendido";
   tag?: string;
+  stock?: number;
 }
 
 

@@ -1,215 +1,325 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import type { Product } from "../../data/products";
+
 import { useProductStore } from "../../lib/product-store";
 
 import AddProductForm from "../components/AddProductForm";
 import AdminDashboard from "../components/AdminDashboard";
-import EditProductModal from "../components/EditProductModal";;
+import EditProductModal from "../components/EditProductModal";
 import AdminProductCard from "../components/AdminProductCard";
+
+
+
 
 export default function AdminPage() {
 
 
-  const [, forceUpdate] = useState(0);
 
-
-  const [selectedProduct, setSelectedProduct] =
+  const [selectedProduct,setSelectedProduct] =
     useState<Product | null>(null);
 
 
-  const [search, setSearch] = useState("");
+
+  const [search,setSearch] =
+    useState("");
 
 
-  const [filterStatus, setFilterStatus] =
+
+  const [filterStatus,setFilterStatus] =
     useState("Todos");
-    const [filterType, setFilterType] =
-  useState("Todos");
-    const [sortBy, setSortBy] =
-  useState("recientes");
 
 
-  useEffect(() => {
+
+  const [filterType,setFilterType] =
+    useState("Todos");
 
 
-    const refresh = () => {
 
-      forceUpdate((value) => value + 1);
+  const [sortBy,setSortBy] =
+    useState("recientes");
+
+
+
+
+
+  const productsAdded =
+    useProductStore(
+      (state)=>state.productsAdded
+    );
+
+
+
+  const loadProducts =
+    useProductStore(
+      (state)=>state.loadProducts
+    );
+
+
+
+  const updateStatus =
+    useProductStore(
+      (state)=>state.updateStatus
+    );
+
+
+
+  const deleteProduct =
+    useProductStore(
+      (state)=>state.deleteProduct
+    );
+
+
+
+
+
+
+  useEffect(()=>{
+
+
+    loadProducts();
+
+
+
+
+    const syncProducts = ()=>{
+
+
+      loadProducts();
+
 
     };
 
 
+
+
+
     window.addEventListener(
+
       "product-status-change",
-      refresh
+
+      syncProducts
+
     );
 
 
-    window.addEventListener(
-      "storage",
-      refresh
-    );
 
 
-    return () => {
+
+
+    return ()=>{
+
 
       window.removeEventListener(
+
         "product-status-change",
-        refresh
+
+        syncProducts
+
       );
 
-
-      window.removeEventListener(
-        "storage",
-        refresh
-      );
 
     };
 
 
-  }, []);
+
+  },[loadProducts]);
 
 
 
 
 
-  const productStatus = useProductStore(
-    (state) => state.productStatus
-  );
 
 
 
-  const productsAdded = useProductStore(
-  (state) => state.productsAdded
-);
+  const allProducts = [
 
-const loadProducts = useProductStore(
-  (state) => state.loadProducts
-);
-useEffect(() => {
+    ...productsAdded,
 
-  loadProducts();
-
-}, [loadProducts]);
-
-const allProducts = [
-  ...productsAdded,
-];
+  ];
 
 
-  const updateStatus = useProductStore(
-    (state) => state.updateStatus
-  );
 
-  const deleteProduct = useProductStore(
-  (state) => state.deleteProduct
-);
-
-
-const updateProduct = useProductStore(
-  (state) => state.updateProduct
-);
 
 
 
 
   const filteredProducts =
-  allProducts.filter((product) => {
 
-    const currentStatus =
-      productStatus[product.id] ||
-      product.status ||
-      "Disponible";
+    allProducts.filter(
+
+      (product)=>{
 
 
-    const matchesSearch =
-      product.name
-        .toLowerCase()
-        .includes(
-          search.toLowerCase()
+
+        const currentStatus =
+
+          product.status ??
+          "Disponible";
+
+
+
+
+
+        const matchesSearch =
+
+          product.name
+          .toLowerCase()
+          .includes(
+
+            search.toLowerCase()
+
+          );
+
+
+
+
+
+
+        const matchesStatus =
+
+          filterStatus === "Todos"
+
+          ||
+
+          currentStatus === filterStatus;
+
+
+
+
+
+
+
+        const matchesType =
+
+          filterType === "Todos"
+
+          ||
+
+          product.type?.trim() === filterType;
+
+
+
+
+
+
+
+        return (
+
+          matchesSearch
+
+          &&
+
+          matchesStatus
+
+          &&
+
+          matchesType
+
         );
 
 
-    const matchesStatus =
-      filterStatus === "Todos" ||
-      currentStatus === filterStatus;
 
-      const matchesType =
-  filterType === "Todos" ||
-  product.type?.trim() === filterType;
-return (
-  matchesSearch &&
-  matchesStatus &&
-  matchesType
-);
+      }
 
-  });
+    );
+  const sortedProducts =
+
+    [...filteredProducts].sort(
+
+      (a,b)=>{
 
 
-const sortedProducts =
-  [...filteredProducts].sort((a, b) => {
+        if(sortBy === "nombre"){
+
+          return a.name.localeCompare(
+            b.name
+          );
+
+        }
 
 
-    if (sortBy === "nombre") {
 
-      return a.name.localeCompare(
-        b.name
-      );
+        if(sortBy === "precio-menor"){
 
-    }
+          return a.price - b.price;
 
-
-    if (sortBy === "precio-menor") {
-
-      return a.price - b.price;
-
-    }
+        }
 
 
-    if (sortBy === "precio-mayor") {
-
-      return b.price - a.price;
-
-    }
 
 
-    return b.id - a.id;
+        if(sortBy === "precio-mayor"){
 
-  });
+          return b.price - a.price;
 
-  const totalProducts = allProducts.length;
-
-const availableProducts =
-  allProducts.filter(
-    (product) =>
-      (
-        productStatus[product.id] ||
-        product.status
-      ) === "Disponible"
-  ).length;
+        }
 
 
-const pendingProducts =
-  allProducts.filter(
-    (product) =>
-      (
-        productStatus[product.id] ||
-        product.status
-      ) === "En trato"
-  ).length;
+
+        return b.id - a.id;
 
 
-const soldProducts =
-  allProducts.filter(
-    (product) =>
-      (
-        productStatus[product.id] ||
-        product.status
-      ) === "Vendido"
-  ).length;
+      }
+
+    );
+
+
+
+
+
+
+
+  const totalProducts =
+    allProducts.length;
+
+
+
+
+  const availableProducts =
+
+    allProducts.filter(
+
+      (product)=>
+
+        product.status === "Disponible"
+
+    ).length;
+
+
+
+
+
+  const pendingProducts =
+
+    allProducts.filter(
+
+      (product)=>
+
+        product.status === "En trato"
+
+    ).length;
+
+
+
+
+
+  const soldProducts =
+
+    allProducts.filter(
+
+      (product)=>
+
+        product.status === "Vendido"
+
+    ).length;
+
+
 
 
 
@@ -218,7 +328,6 @@ const soldProducts =
 
   return (
 
-
     <main className="min-h-screen bg-gray-100 py-20">
 
 
@@ -226,140 +335,246 @@ const soldProducts =
 
 
 
+
+
         <h1 className="mb-10 text-4xl font-black text-black">
-  Panel de Administración
-</h1>
-<AdminDashboard
 
-  total={totalProducts}
+          Panel de Administración
 
-  available={availableProducts}
-
-  pending={pendingProducts}
-
-  sold={soldProducts}
-
-/>
-
-
-<AddProductForm />
-<div className="mb-10 grid gap-4 md:grid-cols-2">
-
-
-  <input
-    value={search}
-    onChange={(e) =>
-      setSearch(e.target.value)
-    }
-    placeholder="🔎 Buscar producto..."
-    className="rounded-xl border p-3 text-black"
-  />
-
-
-  <select
-    value={filterStatus}
-    onChange={(e) =>
-      setFilterStatus(e.target.value)
-    }
-    className="rounded-xl border p-3 text-black"
-  >
-
-    <option value="Todos">
-      Todos los estados
-    </option>
-
-    <option value="Disponible">
-      Disponible
-    </option>
-
-    <option value="En trato">
-      En trato
-    </option>
-
-    <option value="Vendido">
-      Vendido
-    </option>
-
-  </select>
+        </h1>
 
 
 
-  <select
-    value={filterType}
-    onChange={(e) =>
-      setFilterType(e.target.value)
-    }
-    className="rounded-xl border p-3 text-black"
-  >
-
-    <option value="Todos">
-      Todos los tipos
-    </option>
-
-    <option value="Playera">
-      Playera
-    </option>
-
-    <option value="Sudadera">
-      Sudadera
-    </option>
-
-    <option value="Jeans">
-      Jeans
-    </option>
-
-    <option value="Chamarra">
-      Chamarra
-    </option>
-
-    <option value="Calzado">
-      Calzado
-    </option>
-
-    <option value="Accesorio">
-      Accesorio
-    </option>
-
-  </select>
 
 
 
-  <select
-    value={sortBy}
-    onChange={(e) =>
-      setSortBy(e.target.value)
-    }
-    className="rounded-xl border p-3 text-black"
-  >
+        <AdminDashboard
 
-    <option value="recientes">
-      Más recientes
-    </option>
+          total={totalProducts}
 
-    <option value="nombre">
-      Nombre A-Z
-    </option>
+          available={availableProducts}
 
-    <option value="precio-menor">
-      Precio menor
-    </option>
+          pending={pendingProducts}
 
-    <option value="precio-mayor">
-      Precio mayor
-    </option>
+          sold={soldProducts}
 
-  </select>
+        />
 
 
-</div>
+
+
+
+
+        <AddProductForm />
+
+
+
+
+
+
+
+        <div className="mb-10 grid gap-4 md:grid-cols-2">
+
+
+
+          <input
+
+            value={search}
+
+            onChange={(e)=>
+
+              setSearch(e.target.value)
+
+            }
+
+            placeholder="🔎 Buscar producto..."
+
+            className="rounded-xl border p-3 text-black"
+
+          />
+
+
+
+
+
+
+          <select
+
+            value={filterStatus}
+
+            onChange={(e)=>
+
+              setFilterStatus(
+                e.target.value
+              )
+
+            }
+
+            className="rounded-xl border p-3 text-black"
+
+          >
+
+            <option value="Todos">
+
+              Todos los estados
+
+            </option>
+
+
+            <option value="Disponible">
+
+              Disponible
+
+            </option>
+
+
+            <option value="En trato">
+
+              En trato
+
+            </option>
+
+
+            <option value="Vendido">
+
+              Vendido
+
+            </option>
+
+
+          </select>
+
+
+
+
+
+
+          <select
+
+            value={filterType}
+
+            onChange={(e)=>
+
+              setFilterType(
+                e.target.value
+              )
+
+            }
+
+            className="rounded-xl border p-3 text-black"
+
+          >
+
+            <option value="Todos">
+
+              Todos los tipos
+
+            </option>
+
+            <option value="Playera">
+
+              Playera
+
+            </option>
+
+            <option value="Sudadera">
+
+              Sudadera
+
+            </option>
+
+            <option value="Jeans">
+
+              Jeans
+
+            </option>
+
+            <option value="Chamarra">
+
+              Chamarra
+
+            </option>
+
+            <option value="Calzado">
+
+              Calzado
+
+            </option>
+
+            <option value="Accesorio">
+
+              Accesorio
+
+            </option>
+
+          </select>
+
+
+
+
+
+
+          <select
+
+            value={sortBy}
+
+            onChange={(e)=>
+
+              setSortBy(
+                e.target.value
+              )
+
+            }
+
+            className="rounded-xl border p-3 text-black"
+
+          >
+
+            <option value="recientes">
+
+              Más recientes
+
+            </option>
+
+
+            <option value="nombre">
+
+              Nombre A-Z
+
+            </option>
+
+
+            <option value="precio-menor">
+
+              Precio menor
+
+            </option>
+
+
+            <option value="precio-mayor">
+
+              Precio mayor
+
+            </option>
+
+
+          </select>
+
+
+
+
+        </div>
+
+
 
 
 
 
         <p className="mb-10 text-gray-600">
-          Gestiona la disponibilidad de tus productos Nexa Shop.
-        </p>
 
+          Gestiona la disponibilidad de tus productos Nexa Shop.
+
+        </p>
 
 
 
@@ -370,58 +585,87 @@ const soldProducts =
 
 
 
+          {sortedProducts.map(
+
+            (product)=>(
 
 
-         {sortedProducts.map((product) => (
-  <AdminProductCard
-    key={product.id}
-    product={product}
-    currentStatus={
-      productStatus[product.id] ||
-      product.status ||
-      "Disponible"
-    }
-    onStatusChange={updateStatus}
-    onEdit={setSelectedProduct}
-    onDelete={(id) => {
-      const confirmDelete = confirm(
-        "¿Eliminar este producto?"
-      );
+              <AdminProductCard
 
-      if (confirmDelete) {
-        deleteProduct(id);
-      }
-    }}
-  />
-))}
+                key={product.id}
+
+                product={product}
+
+                currentStatus={
+                  product.status ??
+                  "Disponible"
+                }
+
+                onStatusChange={
+                  updateStatus
+                }
+
+                onEdit={
+                  setSelectedProduct
+                }
+
+                onDelete={
+                  async(id)=>{
 
 
+                    const confirmDelete =
+                      confirm(
+                        "¿Eliminar este producto?"
+                      );
+
+
+
+                    if(confirmDelete){
+
+                      await deleteProduct(id);
+
+                    }
+
+
+                  }
+                }
+
+              />
+
+
+            )
+
+          )}
 
 
 
         </div>
 
+
+
+
+
+
         <EditProductModal
 
-  product={selectedProduct}
+          product={selectedProduct}
 
-  onClose={() =>
+          onClose={()=>
 
-    setSelectedProduct(null)
-  }
-/>
+            setSelectedProduct(null)
+
+          }
+
+        />
+
+
 
 
 
       </div>
 
 
-
-
-
-
     </main>
-
 
   );
 

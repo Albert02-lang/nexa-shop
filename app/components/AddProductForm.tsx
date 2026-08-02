@@ -62,6 +62,11 @@ const loadProducts = useProductStore(
         const fileName =
           `${Date.now()}-${imageFile.name}`;
 
+          if (!supabase) {
+  console.error("Supabase no está configurado");
+  return;
+}
+
 
         const { error: uploadError } =
           await supabase.storage
@@ -98,6 +103,10 @@ const loadProducts = useProductStore(
 
 
       // GUARDAR PRODUCTO EN TABLA
+      if (!supabase) {
+  console.error("Supabase no está configurado");
+  return;
+}
 
       const { error } =
         await supabase

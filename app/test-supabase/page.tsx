@@ -11,6 +11,10 @@ export default function TestSupabase() {
 
     async function testConnection() {
 
+      if (!supabase) {
+  console.error("Supabase no está configurado");
+  return;
+}
       const { data, error } = await supabase
         .from("products")
         .select("*");
