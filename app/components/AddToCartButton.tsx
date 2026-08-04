@@ -1,17 +1,22 @@
 "use client";
 
+
 import { useState } from "react";
 
+
 import { useCartStore } from "../../lib/cart-store";
+
 import { useProductStore } from "../../lib/product-store";
 
-import type { Product } from "../../data/products";
+
+import type { Product } from "../../types/product";
+
 
 
 
 interface AddToCartButtonProps {
 
-  product: Product;
+product:Product;
 
 }
 
@@ -20,241 +25,226 @@ interface AddToCartButtonProps {
 
 export default function AddToCartButton({
 
-  product,
+product,
 
-}: AddToCartButtonProps) {
+}:AddToCartButtonProps){
 
 
 
-  const addItem =
-    useCartStore(
-      (state) => state.addItem
-    );
+const addItem =
+useCartStore(
+(state)=>state.addItem
+);
 
 
 
-  const items =
-    useCartStore(
-      (state) => state.items
-    );
+const items =
+useCartStore(
+(state)=>state.items
+);
 
 
 
-  const updateStatus =
-    useProductStore(
-      (state) => state.updateStatus
-    );
+const updateStatus =
+useProductStore(
+(state)=>state.updateStatus
+);
 
 
 
-  const [showMessage,setShowMessage] =
-    useState(false);
+const [showMessage,setShowMessage] =
+useState(false);
 
 
 
 
+const isInCart =
+items.some(
 
-  const isInCart =
-    items.some(
+(item)=>
 
-      (item)=>
+item.id === product.id
 
-        item.id === product.id
+);
 
-    );
 
 
 
 
 
+const handleAddToCart = async()=>{
 
 
-  const handleAddToCart =
-    async () => {
 
+if(
 
+product.id === undefined ||
 
-      if(
+isInCart ||
 
-        isInCart ||
+product.status !== "Disponible"
 
-        product.status !== "Disponible"
+){
 
-      ){
+return;
 
-        return;
+}
 
-      }
 
 
+addItem(product);
 
 
 
 
-      addItem(product);
+await updateStatus(
 
+product.id,
 
+"En trato"
 
+);
 
 
-      await updateStatus(
 
-        product.id,
 
-        "En trato"
+setShowMessage(true);
 
-      );
 
 
+setTimeout(()=>{
 
+setShowMessage(false);
 
+},2000);
 
 
-      setShowMessage(true);
 
+};
 
 
 
 
 
-      setTimeout(()=>{
 
+if(product.status !== "Disponible"){
 
-        setShowMessage(false);
 
 
-      },2000);
+return (
 
+<button
 
+disabled
 
+className={`mt-6 w-full rounded-xl py-4 font-bold text-white ${
+product.status === "En trato"
 
+?
 
-    };
+"bg-yellow-500"
 
+:
 
+"bg-red-600"
 
+}`}
 
+>
 
+{
 
+product.status === "En trato"
 
+?
 
-  if(product.status !== "Disponible"){
+"🟡 Producto en trato"
 
+:
 
-    return (
+"🔴 Producto vendido"
 
-      <button
+}
 
-        disabled
 
-        className={`mt-6 w-full rounded-xl py-4 font-bold text-white ${
-          
-          product.status === "En trato"
+</button>
 
-          ? "bg-yellow-500"
+);
 
-          : "bg-red-600"
 
-        }`}
+}
 
-      >
 
-        {
 
-        product.status === "En trato"
 
-        ? "🟡 Producto en trato"
 
-        : "🔴 Producto vendido"
 
-        }
+return (
 
+<>
 
-      </button>
 
-    );
+<button
 
+onClick={handleAddToCart}
 
-  }
+disabled={isInCart}
 
+className={`mt-6 w-full rounded-xl py-4 font-bold text-white transition ${
+isInCart
 
+?
 
+"cursor-not-allowed bg-green-600"
 
+:
 
+"bg-blue-600 hover:bg-blue-700"
 
+}`}
 
+>
 
-  return (
 
-    <>
+{
 
+isInCart
 
-      <button
+?
 
+"✅ Pieza reservada en carrito"
 
-        onClick={handleAddToCart}
+:
 
+"⭐ Reservar esta pieza"
 
-        disabled={isInCart}
+}
 
 
+</button>
 
-        className={`mt-6 w-full rounded-xl py-4 font-bold text-white transition ${
-          
-          isInCart
 
-          ? "cursor-not-allowed bg-green-600"
 
-          : "bg-blue-600 hover:bg-blue-700"
 
-        }`}
 
+{showMessage && (
 
-      >
+<div
 
+className="mt-4 rounded-xl border border-green-200 bg-green-100 px-4 py-3 text-center font-medium text-green-700"
 
-        {
+>
 
-        isInCart
+✅ {product.name} reservado correctamente
 
-        ? "✅ Pieza reservada en carrito"
+</div>
 
-        : "⭐ Reservar esta pieza"
+)}
 
-        }
 
+</>
 
-
-      </button>
-
-
-
-
-
-
-
-      {showMessage && (
-
-
-        <div
-
-          className="mt-4 rounded-xl border border-green-200 bg-green-100 px-4 py-3 text-center font-medium text-green-700"
-
-        >
-
-          ✅ {product.name} reservado correctamente
-
-        </div>
-
-
-      )}
-
-
-
-    </>
-
-
-  );
+);
 
 
 }

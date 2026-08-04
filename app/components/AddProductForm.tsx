@@ -5,70 +5,117 @@ import { useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useProductStore } from "../../lib/product-store";
 
+import type { NewProduct } from "../../types/product";
+
+
 export default function AddProductForm() {
 
+
   const [name, setName] = useState("");
+
   const [price, setPrice] = useState("");
+
   const [category, setCategory] = useState("");
+
   const [type, setType] = useState("");
+
   const [gender, setGender] = useState("");
+
   const [description, setDescription] = useState("");
+
   const [tag, setTag] = useState("");
+
   const [size, setSize] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const [message, setMessage] = useState("");
+  const [colors, setColors] = useState("");
 
-  const [loading, setLoading] = useState(false);
-const loadProducts = useProductStore(
-  (state) => state.loadProducts
-);
+  const [imageFile, setImageFile] =
+    useState<File | null>(null);
+
+
+
+  const [message, setMessage] =
+    useState("");
+
+
+
+  const [loading, setLoading] =
+    useState(false);
+
+
+
+
+  const addProduct =
+    useProductStore(
+      (state) => state.addProduct
+    );
+
+
+
 
 
   const handleSubmit = async (
     e: React.FormEvent
   ) => {
 
+
     e.preventDefault();
+
+
 
     if (
       name.trim() === "" ||
       price.trim() === ""
     ) {
 
+
       setMessage(
         "⚠️ Completa nombre y precio"
       );
 
+
       return;
+
 
     }
 
 
+
+
+
     try {
 
+
       setLoading(true);
+
       setMessage("");
+
+
 
       let imageUrl =
         "/images/products/default.jpg";
 
 
 
+
+
+
       // SUBIR IMAGEN AL STORAGE
 
-      if (imageFile) {
+      if(imageFile){
+
+
 
         const fileName =
           `${Date.now()}-${imageFile.name}`;
 
-          if (!supabase) {
-  console.error("Supabase no está configurado");
-  return;
-}
 
 
-        const { error: uploadError } =
+
+
+        const {
+          error: uploadError
+        } =
           await supabase.storage
             .from("products")
             .upload(
@@ -77,7 +124,10 @@ const loadProducts = useProductStore(
             );
 
 
-        if (uploadError) {
+
+
+
+        if(uploadError){
 
           throw uploadError;
 
@@ -85,7 +135,11 @@ const loadProducts = useProductStore(
 
 
 
-        const { data } =
+
+
+        const {
+          data
+        } =
           supabase.storage
             .from("products")
             .getPublicUrl(
@@ -93,76 +147,100 @@ const loadProducts = useProductStore(
             );
 
 
+
+
+
         imageUrl =
           data.publicUrl;
 
-      }
-
-
-
-
-
-      // GUARDAR PRODUCTO EN TABLA
-      if (!supabase) {
-  console.error("Supabase no está configurado");
-  return;
-}
-
-      const { error } =
-        await supabase
-          .from("products")
-          .insert({
-
-            name,
-
-            price:
-              Number(price),
-
-            image:
-              imageUrl,
-
-            category:
-              category || "Sin categoría",
-
-            type:
-              type || "Sin tipo",
-
-            gender:
-              gender || "Unisex",
-
-            description:
-              description ||
-              "Producto agregado desde administración.",
-
-              size:
-  size || "Única",
-
-            available:
-              true,
-
-            status:
-              "Disponible",
-
-            tag:
-              tag || "Nuevo",
-
-            stock:
-              1,
-
-            featured:
-              false,
-
-          });
-
-
-
-      if (error) {
-
-        throw error;
 
       }
 
-      await loadProducts();
+
+
+
+
+
+
+
+      // GUARDAR PRODUCTO MEDIANTE ZUSTAND
+
+      const newProduct: NewProduct = {
+
+
+
+        name,
+
+
+        price:
+          Number(price),
+
+
+
+        image:
+          imageUrl,
+
+
+
+        category:
+          category || "Sin categoría",
+
+
+
+        type:
+          type || "Sin tipo",
+
+
+
+        gender:
+          gender || "Unisex",
+
+
+
+        description:
+          description ||
+          "Producto agregado desde administración.",
+
+
+
+        size:
+          size || "Única",
+
+colors:
+  colors
+    ? colors
+        .split(",")
+        .map((color) => color.trim())
+    : [],
+
+
+
+        available:
+          true,
+
+
+
+        status:
+          "Disponible",
+
+
+
+        tag:
+          tag || "Nuevo",
+
+
+
+        stock:
+          1,
+
+
+
+      };
+      await addProduct(newProduct);
+
+
+
+
 
 
 
@@ -171,44 +249,68 @@ const loadProducts = useProductStore(
       );
 
 
-      // LIMPIAR
+
+
+
+
+      // LIMPIAR FORMULARIO
+
+
       setSize("");
 
+      setColors("");
+
       setName("");
+
       setPrice("");
+
       setCategory("");
+
       setType("");
+
       setGender("");
+
       setDescription("");
+
       setTag("");
+
       setImageFile(null);
 
 
 
-    } catch (error: any) {
 
-  console.error("ERROR COMPLETO:", error);
-  console.error("MENSAJE:", error?.message);
-  console.error("DETALLES:", error?.details);
-  console.error("HINT:", error?.hint);
+    } catch(error:any){
 
-  setMessage(
-    error?.message ?? "❌ Error al guardar producto"
-  );
 
-} finally {
+
+      console.error(
+        "ERROR COMPLETO:",
+        error
+      );
+
+
+
+      setMessage(
+        error?.message ??
+        "❌ Error al guardar producto"
+      );
+
+
+
+    } finally {
+
+
 
       setLoading(false);
 
+
+
     }
 
+
+
   };
-
-
-
-
-
-  return (
+    return (
 
     <form
       onSubmit={handleSubmit}
@@ -217,12 +319,17 @@ const loadProducts = useProductStore(
 
 
       <h2 className="mb-6 text-2xl font-black text-black">
+
         ➕ Agregar producto
+
       </h2>
 
 
 
+
+
       <div className="grid gap-4 md:grid-cols-2">
+
 
 
         <input
@@ -241,6 +348,8 @@ const loadProducts = useProductStore(
 
 
 
+
+
         <input
 
           value={price}
@@ -256,6 +365,8 @@ const loadProducts = useProductStore(
           className="rounded-xl border p-3 text-black"
 
         />
+
+
 
 
 
@@ -298,6 +409,8 @@ const loadProducts = useProductStore(
 
 
 
+
+
         <select
 
           value={type}
@@ -314,27 +427,37 @@ const loadProducts = useProductStore(
             Tipo
           </option>
 
+
           <option>
             Playera
           </option>
+
 
           <option>
             Sudadera
           </option>
 
+
           <option>
             Jeans
           </option>
+
 
           <option>
             Chamarra
           </option>
 
+
           <option>
             Calzado
           </option>
 
+
         </select>
+
+
+
+
 
 
 
@@ -354,78 +477,113 @@ const loadProducts = useProductStore(
             Género
           </option>
 
+
           <option>
             Hombre
           </option>
+
 
           <option>
             Mujer
           </option>
 
+
           <option>
             Niños
           </option>
+
 
           <option>
             Unisex
           </option>
 
+
         </select>
+
+
+
+
+
+
+
         <select
 
-  value={size}
+          value={size}
+
+          onChange={(e)=>
+            setSize(e.target.value)
+          }
+
+          className="rounded-xl border p-3 text-black"
+
+        >
+
+
+          <option value="">
+            Talla
+          </option>
+
+
+          <option>
+            CH
+          </option>
+
+
+          <option>
+            M
+          </option>
+
+
+          <option>
+            G
+          </option>
+
+
+          <option>
+            XL
+          </option>
+
+
+          <option>
+            28
+          </option>
+
+
+          <option>
+            30
+          </option>
+
+
+          <option>
+            32
+          </option>
+
+
+          <option>
+            34
+          </option>
+
+
+          <option>
+            Única
+          </option>
+
+
+        </select>
+
+        <input
+
+  value={colors}
 
   onChange={(e)=>
-    setSize(e.target.value)
+    setColors(e.target.value)
   }
+
+  placeholder="Colores (Ej: Negro, Blanco, Azul)"
 
   className="rounded-xl border p-3 text-black"
 
->
-
-  <option value="">
-    Talla
-  </option>
-
-  <option>
-    CH
-  </option>
-
-  <option>
-    M
-  </option>
-
-  <option>
-    G
-  </option>
-
-  <option>
-    XL
-  </option>
-
-  <option>
-    28
-  </option>
-
-  <option>
-    30
-  </option>
-
-  <option>
-    32
-  </option>
-
-  <option>
-    34
-  </option>
-
-  <option>
-    Única
-  </option>
-
-</select>
-
-
+/>
 
 
         <input
@@ -443,7 +601,12 @@ const loadProducts = useProductStore(
         />
 
 
+
       </div>
+
+
+
+
 
 
 
@@ -466,11 +629,21 @@ const loadProducts = useProductStore(
 
 
 
+
+
+
+
       <div className="mt-4">
 
+
         <label className="font-bold text-black">
+
           Imagen del producto
+
         </label>
+
+
+
 
 
         <input
@@ -491,7 +664,13 @@ const loadProducts = useProductStore(
 
         />
 
+
+
       </div>
+
+
+
+
 
 
 
@@ -505,9 +684,21 @@ const loadProducts = useProductStore(
 
       >
 
+
         {loading
-          ? "Guardando..."
-          : "Guardar producto"}
+
+          ?
+
+          "Guardando..."
+
+          :
+
+          "Guardar producto"
+
+
+        }
+
+
 
       </button>
 
@@ -515,20 +706,30 @@ const loadProducts = useProductStore(
 
 
 
+
+
+
+
       {message && (
+
 
         <p className="mt-4 font-bold text-blue-600">
 
+
           {message}
+
 
         </p>
 
+
       )}
+
 
 
 
     </form>
 
   );
+
 
 }

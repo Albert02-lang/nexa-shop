@@ -1,217 +1,296 @@
+"use client";
+
+
 import { create } from "zustand";
+
 import { persist } from "zustand/middleware";
 
-import type { Product } from "../data/products";
+import type { Product } from "../types/product";
+
 
 
 interface CartItem extends Product {
+
+  id: number;
+
   quantity: number;
+
 }
 
 
 
 interface CartStore {
 
+
   items: CartItem[];
 
-  addItem: (
-    product: Product
-  ) => void;
+
+  addItem:
+    (
+      product: Product
+    ) => void;
 
 
-  removeItem: (
-    id: number
-  ) => void;
+  removeItem:
+    (
+      id:number
+    ) => void;
 
 
-  increaseQuantity: (
-    id: number
-  ) => void;
+  increaseQuantity:
+    (
+      id:number
+    ) => void;
 
 
-  decreaseQuantity: (
-    id: number
-  ) => void;
+  decreaseQuantity:
+    (
+      id:number
+    ) => void;
 
 
-  clearCart: () => void;
+  clearCart:
+    () => void;
+
 
 }
 
 
 
+export const useCartStore =
+create<CartStore>()(
 
 
-export const useCartStore = create<CartStore>()(
+persist(
 
-  persist(
 
+(set)=>({
 
-    (set) => ({
 
+items: [],
 
-      items: [],
 
 
+addItem:(product)=>{
 
-      addItem: (product) =>
 
+if(product.id === undefined){
 
-        set((state) => {
+ return;
 
+}
 
-          const exists =
-            state.items.find(
-              (item) => item.id === product.id
-            );
 
 
-          if (exists) {
+set((state)=>{
 
-            return {
 
-              items: state.items.map(
-                (item) =>
-                  item.id === product.id
-                    ? {
-                        ...item,
-                        quantity:
-                          item.quantity + 1,
-                      }
-                    : item
-              ),
+const exists =
+state.items.find(
+(item)=>
+item.id === product.id
+);
 
-            };
 
-          }
 
+if(exists){
 
 
-          return {
+return {
 
-            items: [
 
-              ...state.items,
+items:
 
-              {
-                ...product,
-                quantity: 1,
-              },
+state.items.map(
+(item)=>
 
-            ],
+item.id === product.id
 
-          };
+?
 
+{
 
-        }),
+...item,
 
+quantity:
+item.quantity + 1
 
+}
 
+:
 
+item
 
+)
 
 
-      removeItem: (id) =>
+};
 
 
-        set((state) => ({
 
-          items:
-            state.items.filter(
-              (item) => item.id !== id
-            ),
+}
 
-        })),
 
 
+return {
 
 
+items:[
 
+...state.items,
 
 
-      increaseQuantity: (id) =>
+{
 
+...product,
 
-        set((state) => ({
+id:product.id,
 
+quantity:1
 
-          items: state.items.map(
+}
 
-            (item) =>
+]
 
-              item.id === id
 
-                ? {
-                    ...item,
-                    quantity:
-                      item.quantity + 1,
-                  }
+};
 
-                : item
 
-          ),
 
+});
 
-        })),
 
+},
 
 
 
 
+removeItem:(id)=>
 
 
-      decreaseQuantity: (id) =>
+set((state)=>({
 
 
-        set((state) => ({
+items:
 
+state.items.filter(
 
-          items: state.items.map(
+(item)=>
+item.id !== id
 
-            (item) =>
+)
 
-              item.id === id && item.quantity > 1
 
-                ? {
-                    ...item,
-                    quantity:
-                      item.quantity - 1,
-                  }
+})),
 
-                : item
 
-          ),
 
 
-        })),
 
+increaseQuantity:(id)=>
 
 
+set((state)=>({
 
 
+items:
 
+state.items.map(
 
-      clearCart: () =>
+(item)=>
 
-        set({
+item.id === id
 
-          items: [],
+?
 
-        }),
+{
 
+...item,
 
+quantity:
+item.quantity + 1
 
+}
 
-    }),
+:
 
+item
 
-    {
 
-      name: "nexa-shop-cart",
+)
 
-    }
 
+})),
 
-  )
+
+
+
+
+
+decreaseQuantity:(id)=>
+
+
+set((state)=>({
+
+
+items:
+
+state.items.map(
+
+(item)=>
+
+item.id === id &&
+item.quantity > 1
+
+?
+
+{
+
+...item,
+
+quantity:
+item.quantity - 1
+
+}
+
+:
+
+item
+
+
+)
+
+
+})),
+
+
+
+
+
+clearCart:()=>
+
+
+set({
+
+items:[]
+
+}),
+
+
+
+}),
+
+
+
+{
+
+name:"nexa-shop-cart"
+
+}
+
+
+
+)
+
 
 );

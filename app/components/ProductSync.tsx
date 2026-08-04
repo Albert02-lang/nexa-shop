@@ -9,28 +9,28 @@ import { useProductStore } from "../../lib/product-store";
 export default function ProductSync() {
 
 
-
   const loadProducts =
     useProductStore(
-      (state) => state.loadProducts
+      (state)=>state.loadProducts
     );
 
 
 
-
-  useEffect(() => {
-
+  useEffect(()=>{
 
 
-    const syncProducts = async () => {
+    // Carga inicial al abrir la tienda
+    loadProducts();
+
+
+
+    const syncProducts = async()=>{
 
 
       await loadProducts();
 
 
     };
-
-
 
 
 
@@ -44,10 +44,7 @@ export default function ProductSync() {
 
 
 
-
-
-    return () => {
-
+    return()=>{
 
 
       window.removeEventListener(
@@ -62,15 +59,10 @@ export default function ProductSync() {
     };
 
 
-
   },[loadProducts]);
 
 
 
-
-
-
   return null;
-
 
 }

@@ -1,661 +1,615 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+
+import { useMemo, useState } from "react";
 
 import Link from "next/link";
+
 import Image from "next/image";
 
+
+import type { Product } from "../../types/product";
+
+
 import { useCartStore } from "../../lib/cart-store";
+
 import { useProductStore } from "../../lib/product-store";
 
+
 import ProductSearch from "./ProductSearch";
+
 import ProductFilters from "./ProductFilters";
+
 import FavoriteButton from "./FavoriteButton";
 
 
 
-export default function FeaturedProducts() {
 
 
+export default function FeaturedProducts(){
 
-  const whatsappNumber =
-    "525535059049";
 
 
+const whatsappNumber =
+"525535059049";
 
-  const addItem =
-    useCartStore(
-      (state) => state.addItem
-    );
 
 
 
-  const cartItems =
-    useCartStore(
-      (state) => state.items
-    );
 
+const addItem =
+useCartStore(
+(state)=>state.addItem
+);
 
 
-  const productsAdded =
-    useProductStore(
-      (state) => state.productsAdded
-    );
 
 
+const cartItems =
+useCartStore(
+(state)=>state.items
+);
 
-  const loadProducts =
-    useProductStore(
-      (state) => state.loadProducts
-    );
 
 
 
-  const updateStatus =
-    useProductStore(
-      (state) => state.updateStatus
-    );
+const productsAdded =
+useProductStore(
+(state)=>state.productsAdded
+);
 
 
 
 
+const updateStatus =
+useProductStore(
+(state)=>state.updateStatus
+);
 
-  useEffect(() => {
 
 
-    loadProducts();
 
 
 
-    const syncProducts = () => {
+const [search,setSearch] =
+useState("");
 
 
-      loadProducts();
 
+const [category,setCategory] =
+useState("Todos");
 
-    };
 
 
+const [sort,setSort] =
+useState("default");
 
-    window.addEventListener(
-      "product-status-change",
-      syncProducts
-    );
 
 
 
-    return () => {
 
 
-      window.removeEventListener(
-        "product-status-change",
-        syncProducts
-      );
+const isInCart = (id:number)=>{
 
 
-    };
+return cartItems.some(
 
+(item)=>
 
-  }, [loadProducts]);
+item.id===id
 
+);
 
 
+};
 
 
 
 
-  const [search, setSearch] =
-    useState("");
 
 
 
-  const [category, setCategory] =
-    useState("Todos");
 
+const filteredProducts =
+useMemo<Product[]>(()=>{
 
 
-  const [sort, setSort] =
-    useState("default");
+let list=[...productsAdded];
 
 
 
 
+if(category !== "Todos"){
 
 
-  const isInCart = (
-    id:number
-  ) => {
+list =
+list.filter(
 
+(product)=>
 
-    return cartItems.some(
+product.category===category
 
-      (item) =>
+);
 
-        item.id === id
 
-    );
+}
 
 
-  };
 
 
 
+if(search.trim() !== ""){
 
 
+const text =
+search.toLowerCase();
 
 
-  const filteredProducts =
-    useMemo(() => {
 
+list =
+list.filter(
 
-      let list = [
+(product)=>
 
-        ...productsAdded,
+product.name
+.toLowerCase()
+.includes(text)
 
-      ];
+||
 
+product.category
+.toLowerCase()
+.includes(text)
 
+||
 
-      if(category !== "Todos"){
+product.description
+.toLowerCase()
+.includes(text)
 
+);
 
-        list =
-          list.filter(
 
-            (product)=>
 
-              product.category === category
+}
 
-          );
 
 
-      }
 
 
+switch(sort){
 
 
 
-      if(search.trim() !== ""){
+case "price-asc":
 
+list.sort(
 
-        const text =
-          search.toLowerCase();
+(a,b)=>
 
+a.price-b.price
 
+);
 
-        list =
-          list.filter(
+break;
 
-            (product)=>
 
-              product.name
-              .toLowerCase()
-              .includes(text)
 
-              ||
 
-              product.category
-              .toLowerCase()
-              .includes(text)
+case "price-desc":
 
-              ||
+list.sort(
 
-              product.description
-              .toLowerCase()
-              .includes(text)
+(a,b)=>
 
-          );
+b.price-a.price
 
+);
 
-      }
+break;
 
 
 
-      switch(sort){
 
+case "name":
 
-        case "price-asc":
+list.sort(
 
+(a,b)=>
 
-          list.sort(
+a.name.localeCompare(
+b.name
+)
 
-            (a,b)=>
+);
 
-              a.price-b.price
+break;
 
-          );
 
 
-          break;
+}
 
 
 
-        case "price-desc":
+return list;
 
 
-          list.sort(
 
-            (a,b)=>
+},[
+productsAdded,
+category,
+search,
+sort
+]);
 
-              b.price-a.price
 
-          );
 
 
-          break;
 
 
 
-        case "name":
 
 
-          list.sort(
+return (
 
-            (a,b)=>
+<section
+id="productos"
+className="bg-gray-50 py-16"
+>
 
-              a.name.localeCompare(
-                b.name
-              )
 
-          );
 
+<div className="mx-auto max-w-7xl px-4">
 
-          break;
 
 
-      }
 
 
 
+<div className="mb-10 text-center">
 
-      return list;
 
+<h2 className="text-4xl font-black text-black">
 
+Productos Destacados
 
-    },[
+</h2>
 
-      productsAdded,
 
-      search,
+<p className="mt-3 text-gray-600">
 
-      category,
+Encuentra prendas seleccionadas para tu estilo.
 
-      sort,
+</p>
 
-    ]);
 
+</div>
 
-  return (
 
-    <section
-      id="productos"
-      className="bg-gray-50 py-16 md:py-20"
-    >
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
 
 
-        <div className="mb-10 text-center">
 
-          <p className="text-sm font-bold uppercase tracking-widest text-blue-600">
-            Nuestra colección
-          </p>
 
+<div className="space-y-6">
 
-          <h2 className="mt-2 text-3xl font-black text-black md:text-4xl">
-            Productos Destacados
-          </h2>
 
+<ProductSearch
 
-          <p className="mt-3 text-gray-600">
-            Encuentra prendas seleccionadas para tu estilo.
-          </p>
+search={search}
 
-        </div>
+setSearch={setSearch}
 
+/>
 
 
 
+<ProductFilters
 
-        <div className="space-y-6">
+category={category}
 
-          <ProductSearch
-            search={search}
-            setSearch={setSearch}
-          />
+setCategory={setCategory}
 
+sort={sort}
 
-          <ProductFilters
-            category={category}
-            setCategory={setCategory}
-            sort={sort}
-            setSort={setSort}
-          />
+setSort={setSort}
 
+/>
 
-        </div>
 
+</div>
 
 
 
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 
 
-          {filteredProducts.map((product)=>{
 
 
-            const currentStatus =
-              product.status ?? "Disponible";
 
+<div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 
 
-            const reserved =
-              isInCart(product.id);
 
 
 
+{filteredProducts.map((product)=>{
 
-            const handleReserve =
-              async () => {
 
 
-                if(
-                  reserved ||
-                  currentStatus !== "Disponible"
-                ){
+const status =
+product.status ?? "Disponible";
 
-                  return;
 
-                }
 
+const reserved =
+product.id !== undefined &&
+isInCart(product.id);
 
 
-                addItem(product);
 
 
 
-                await updateStatus(
 
-                  product.id,
 
-                  "En trato"
+const handleReserve =
+async()=>{
 
-                );
 
+if(
 
-              };
+product.id === undefined ||
 
+reserved ||
 
+status !== "Disponible"
 
+){
 
-            return (
+return;
 
+}
 
-              <div
-                key={product.id}
-                className="group overflow-hidden rounded-3xl bg-white shadow-md transition hover:-translate-y-2 hover:shadow-2xl"
-              >
 
 
 
-                <Link
-                  href={`/products/${product.id}`}
-                >
+addItem(product);
 
 
-                  <div className="relative aspect-[4/5] overflow-hidden">
 
 
-                    <Image
+await updateStatus(
 
-                      src={
-                        product.image &&
-                        product.image.trim() !== ""
+product.id,
 
-                        ? product.image
+"En trato"
 
-                        : "/images/products/default.jpg"
+);
 
-                      }
 
-                      alt={product.name}
 
-                      fill
+};
 
-                      sizes="(max-width:768px) 100vw,25vw"
 
-                      className="object-cover transition duration-500 group-hover:scale-110"
 
-                    />
 
 
 
-                    <div className="absolute left-3 top-3">
+return (
 
-                      <FavoriteButton
-                        product={product}
-                      />
 
-                    </div>
 
+<div
 
+key={product.id}
 
+className="overflow-hidden rounded-3xl bg-white shadow-md"
 
-                    <span
-                      className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-bold text-white ${
-                        
-                        currentStatus === "Disponible"
+>
 
-                        ? "bg-green-600"
 
-                        : currentStatus === "En trato"
 
-                        ? "bg-yellow-500"
 
-                        : "bg-red-600"
 
-                      }`}
-                    >
+<Link href={`/products/${product.id}`}>
 
-                      {currentStatus}
 
-                    </span>
 
+<div className="relative aspect-[4/5]">
 
 
-                  </div>
 
+<Image
 
+src={
+product.image ||
+"/images/products/default.jpg"
 
+}
 
+alt={product.name}
 
-                  <div className="p-5">
+fill
 
+sizes="(max-width:768px)100vw,25vw"
 
-                    <p className="text-xs font-bold uppercase tracking-wide text-blue-600">
+className="object-cover"
 
-                      {product.category}
+/>
 
-                    </p>
 
 
+<div className="absolute left-3 top-3">
 
-                    <h3 className="mt-2 text-lg font-black text-black">
+<FavoriteButton
 
-                      {product.name}
+product={product}
 
-                    </h3>
+/>
 
+</div>
 
 
 
-                    <p className="mt-4 text-2xl font-black text-black">
 
-                      ${product.price}
 
-                      <span className="ml-1 text-sm text-gray-500">
-                        MXN
-                      </span>
+</div>
 
-                    </p>
 
 
 
 
-                    <p className="mt-3 line-clamp-2 text-sm text-gray-600">
+<div className="p-5">
 
-                      {product.description}
 
-                    </p>
 
+<p className="text-sm font-bold text-blue-600">
 
+{product.category}
 
-                  </div>
+</p>
 
 
 
-                </Link>
+<h3 className="text-xl font-black text-black">
 
+{product.name}
 
+</h3>
 
 
 
+<p className="mt-3 text-2xl font-black">
 
-                <div className="space-y-3 border-t px-5 py-5">
+${product.price} MXN
 
+</p>
 
 
-                  <button
 
-                    onClick={handleReserve}
+</div>
 
-                    disabled={
-                      reserved ||
-                      currentStatus !== "Disponible"
-                    }
 
-                    className={`w-full rounded-2xl py-3 font-bold text-white transition ${
-                      
-                      currentStatus === "En trato"
 
-                      ? "cursor-not-allowed bg-yellow-500"
+</Link>
 
-                      : currentStatus === "Vendido"
 
-                      ? "cursor-not-allowed bg-red-600"
 
-                      : reserved
 
-                      ? "cursor-not-allowed bg-green-600"
 
-                      : "bg-blue-600 hover:bg-blue-700"
 
-                    }`}
 
-                  >
 
+<div className="space-y-3 p-5">
 
-                    {
 
-                    currentStatus === "En trato"
 
-                    ? "🟡 Producto en trato"
+<button
 
+onClick={handleReserve}
 
-                    :
+disabled={
+reserved ||
+status !== "Disponible"
+}
 
-                    currentStatus === "Vendido"
+className="w-full rounded-xl bg-blue-600 py-3 font-bold text-white"
 
-                    ? "🔴 Producto vendido"
+>
 
 
-                    :
+{
 
-                    reserved
+status === "En trato"
 
-                    ? "✅ Producto en carrito"
+?
 
+"🟡 Producto en trato"
 
-                    :
+:
 
-                    "🛒 Agregar al carrito"
+status === "Vendido"
 
-                    }
+?
 
+"🔴 Producto vendido"
 
-                  </button>
+:
 
+reserved
 
+?
 
+"✅ Producto en carrito"
 
+:
 
-                  <Link
+"🛒 Agregar al carrito"
 
-                    href={`/products/${product.id}`}
+}
 
-                    className="block w-full rounded-2xl border py-3 text-center font-bold"
 
-                  >
 
-                    👁️ Ver producto
+</button>
 
-                  </Link>
 
 
 
 
 
 
-                  <a
 
-                    href={`https://wa.me/${whatsappNumber}?text=Hola Nexa Shop, me interesa ${product.name}`}
+<a
 
-                    target="_blank"
+href={`https://wa.me/${whatsappNumber}?text=Hola Nexa Shop, me interesa ${product.name}`}
 
-                    rel="noopener noreferrer"
+target="_blank"
 
-                    className="block w-full rounded-2xl bg-black py-3 text-center font-bold text-white"
+rel="noopener noreferrer"
 
-                  >
+className="block rounded-xl bg-black py-3 text-center font-bold text-white"
 
-                    💬 WhatsApp
+>
 
-                  </a>
+💬 WhatsApp
 
+</a>
 
 
 
-                </div>
+</div>
 
 
 
 
-              </div>
 
+</div>
 
-            );
 
+);
 
-          })}
 
+})}
 
 
-        </div>
 
 
 
-      </div>
+</div>
 
 
-    </section>
 
 
-  );
+
+</div>
+
+
+
+</section>
+
+
+);
+
 
 
 }

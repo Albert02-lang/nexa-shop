@@ -1,98 +1,195 @@
+"use client";
+
+
 import { create } from "zustand";
+
 import { persist } from "zustand/middleware";
 
-import type { Product } from "../data/products";
+import type { Product } from "../types/product";
 
 
-interface FavoritesStore {
 
-  favorites: Product[];
+interface FavoriteProduct extends Product {
 
-  addFavorite: (product: Product) => void;
-
-  removeFavorite: (id: number) => void;
-
-  isFavorite: (id: number) => boolean;
+  id:number;
 
 }
 
 
 
-export const useFavoritesStore = create<FavoritesStore>()(
-
-  persist(
-
-    (set, get) => ({
+interface FavoritesStore {
 
 
-      favorites: [],
+  favorites: FavoriteProduct[];
 
 
-
-      addFavorite: (product) =>
-
-        set((state) => {
-
-          const exists = state.favorites.some(
-            (item) => item.id === product.id
-          );
+  addFavorite:
+    (
+      product: Product
+    ) => void;
 
 
-          if (exists) {
-
-            return {
-              favorites: state.favorites,
-            };
-
-          }
+  removeFavorite:
+    (
+      id:number
+    ) => void;
 
 
-          return {
+  isFavorite:
+    (
+      id:number
+    ) => boolean;
 
-            favorites: [
-              ...state.favorites,
-              product,
-            ],
 
-          };
-
-        }),
+}
 
 
 
 
-
-      removeFavorite: (id) =>
-
-        set((state) => ({
-
-          favorites: state.favorites.filter(
-            (item) => item.id !== id
-          ),
-
-        })),
+export const useFavoritesStore =
+create<FavoritesStore>()(
 
 
 
+persist(
 
 
-      isFavorite: (id) =>
-
-        get().favorites.some(
-          (item) => item.id === id
-        ),
+(set,get)=>({
 
 
-    }),
+
+favorites: [],
 
 
-    {
-
-      name: "nexa-shop-favorites",
-
-    }
 
 
-  )
+addFavorite:(product)=>{
+
+
+if(product.id === undefined){
+
+  return;
+
+}
+
+
+
+set((state)=>{
+
+
+
+const exists =
+state.favorites.some(
+
+(item)=>
+
+item.id === product.id
+
+);
+
+
+
+if(exists){
+
+
+return {
+
+favorites:
+state.favorites
+
+};
+
+
+}
+
+
+
+
+return {
+
+
+favorites:[
+
+...state.favorites,
+
+product as FavoriteProduct
+
+]
+
+
+};
+
+
+
+});
+
+
+
+},
+
+
+
+
+
+
+removeFavorite:(id)=>
+
+
+set((state)=>({
+
+
+favorites:
+
+state.favorites.filter(
+
+(item)=>
+
+item.id !== id
+
+)
+
+
+})),
+
+
+
+
+
+
+
+
+isFavorite:(id)=>
+
+
+get()
+.favorites
+.some(
+
+(item)=>
+
+item.id === id
+
+),
+
+
+
+
+}),
+
+
+
+{
+
+
+name:
+"nexa-shop-favorites"
+
+
+}
+
+
+
+)
+
 
 );

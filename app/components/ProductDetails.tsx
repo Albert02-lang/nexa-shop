@@ -6,7 +6,7 @@ import AddToCartButton from "./AddToCartButton";
 import ProductStatus from "./ProductStatus";
 
 import { useProductStore } from "../../lib/product-store";
-import type { Product } from "../../data/products";
+import type { Product } from "../../types/product";
 
 
 interface ProductDetailsProps {

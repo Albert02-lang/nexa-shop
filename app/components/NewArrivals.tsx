@@ -1,6 +1,4 @@
 "use client";
-
-import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -12,16 +10,6 @@ export default function NewArrivals() {
   const productsAdded = useProductStore(
     (state) => state.productsAdded
   );
-  console.log("Productos nuevos desde Supabase:", productsAdded);
-
-  const loadProducts = useProductStore(
-    (state) => state.loadProducts
-  );
-
-  useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
-
 
 const newProducts = productsAdded.slice(0,4);
 
@@ -92,7 +80,13 @@ const newProducts = productsAdded.slice(0,4);
 
 
 
-            {newProducts.map((product) => (
+            {newProducts.map((product) => {
+
+  if(product.id === undefined){
+    return null;
+  }
+
+  return (
 
 
 
@@ -131,9 +125,14 @@ const newProducts = productsAdded.slice(0,4);
 
                     <Image
 
-                      src={product.image}
+  src={
+    product.image &&
+    product.image.trim() !== ""
+      ? product.image
+      : "/images/products/default.jpg"
+  }
 
-                      alt={product.name}
+  alt={product.name}
 
                       fill
 
@@ -303,7 +302,9 @@ const newProducts = productsAdded.slice(0,4);
 
 
 
-            ))}
+                        );
+
+          })}
 
 
 

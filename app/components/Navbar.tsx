@@ -52,13 +52,12 @@ export default function Navbar() {
 
 
           <Image
-            src="/images/logo.png"
-            alt="Logo Nexa Shop"
-            width={58}
-            height={58}
-            priority
-            className="transition hover:scale-105"
-          />
+  src="/images/logo.png"
+  width={200}
+  height={80}
+  className="h-10 w-auto"
+  alt="Nexa Shop"
+/>
 
 
           <div>

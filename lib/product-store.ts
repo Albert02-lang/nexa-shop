@@ -1,8 +1,14 @@
-import { create } from "zustand";
+"use client";
 
-import type { Product } from "../data/products";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 import { supabase } from "./supabase";
+
+import type {
+  Product,
+  NewProduct,
+} from "../types/product";
 
 
 interface ProductStore {
@@ -14,68 +20,95 @@ interface ProductStore {
     "Disponible" | "En trato" | "Vendido"
   >;
 
+
   loadProducts: () => Promise<void>;
 
+
+  addProduct: (
+    product: NewProduct
+  ) => Promise<void>;
+
+
+  updateProduct: (
+    product: Product
+  ) => Promise<void>;
+
+
   updateStatus: (
-    id:number,
+    id: number,
     status:
       | "Disponible"
       | "En trato"
       | "Vendido"
   ) => Promise<void>;
 
-  addProduct: (
-    product:Product
-  ) => Promise<void>;
-
-  updateProduct: (
-    id:number,
-    product:Partial<Product>
-  ) => Promise<void>;
 
   deleteProduct: (
-    id:number
+    id: number
   ) => Promise<void>;
 
 }
 
 
 
-function mapProduct(item:any):Product {
+
+function mapProduct(
+  item: any
+): Product {
 
   return {
 
-    id:item.id,
+    id: item.id,
 
-    name:item.name ?? "",
+    name:
+      item.name ?? "",
 
-    price:item.price ?? 0,
+    price:
+      Number(item.price ?? 0),
 
-    oldPrice:item.oldPrice ?? undefined,
+    oldPrice:
+      item.old_price ??
+      item.oldPrice ??
+      undefined,
 
-    image:item.image ?? "",
+    image:
+      item.image ?? "",
 
-    category:item.category ?? "",
+    category:
+      item.category ?? "",
 
-    type:item.type ?? "",
+    type:
+      item.type ?? "",
 
-    gender:item.gender ?? "",
+    gender:
+      item.gender ?? "",
 
-    description:item.description ?? "",
+    description:
+      item.description ?? "",
 
-    size:item.size ?? "",
+    size:
+      item.size ?? undefined,
 
-    sizes:item.sizes ?? [],
+    sizes:
+      item.sizes ?? [],
 
-    colors:item.colors ?? [],
+    colors:
+      Array.isArray(item.colors)
+        ? item.colors
+        : [],
 
-    available:item.available ?? true,
+    available:
+      item.available ?? true,
 
-    status:item.status ?? "Disponible",
+    status:
+      item.status ??
+      "Disponible",
 
-    tag:item.tag ?? undefined,
+    tag:
+      item.tag ?? undefined,
 
-    stock:item.stock ?? undefined,
+    stock:
+      item.stock ?? undefined,
 
   };
 
@@ -84,28 +117,47 @@ function mapProduct(item:any):Product {
 
 
 
+
 export const useProductStore =
-create<ProductStore>((set)=>({
+create<ProductStore>()(
+
+persist(
+
+(set, get) => ({
 
 
-productsAdded:[],
+productsAdded: [],
 
 
-productStatus:{},
+productStatus: {},
 
 
 
 
-loadProducts:async()=>{
+loadProducts:
+async () => {
+
+
+if (!supabase) {
+return;
+}
+
 
 
 const {
 data,
-error
-}=await supabase
+error,
+}
+=
+await supabase
 .from("products")
 .select("*")
-.order("id",{ascending:false});
+.order(
+"id",
+{
+ascending:false
+}
+);
 
 
 
@@ -123,12 +175,20 @@ return;
 
 
 const products =
-(data ?? []).map(mapProduct);
+(data ?? [])
+.map(mapProduct);
 
 
 
-const statusMap =
+set({
+
+productsAdded:
+products,
+
+
+productStatus:
 products.reduce(
+
 (acc,product)=>{
 
 acc[product.id]=product.status;
@@ -136,19 +196,15 @@ acc[product.id]=product.status;
 return acc;
 
 },
+
 {} as Record<
 number,
-"Disponible"|"En trato"|"Vendido"
+"Disponible" |
+"En trato" |
+"Vendido"
 >
-);
 
-
-
-set({
-
-productsAdded:products,
-
-productStatus:statusMap
+)
 
 });
 
@@ -159,127 +215,64 @@ productStatus:statusMap
 
 
 
-updateStatus: async (
-  id,
-  status
+addProduct:
+async (
+product: NewProduct
 ) => {
 
-  console.log(
-    "ACTUALIZANDO ESTADO:",
-    {
-      id,
-      status,
-    }
-  );
+
+if(!supabase){
+return;
+}
 
 
-  const {
-    data,
-    error,
-  } = await supabase
-    .from("products")
-    .update({
-      status,
-      available: status === "Disponible",
-    })
-    .eq("id", id)
-    .select("*");
-
-
-
-  console.log(
-    "RESPUESTA UPDATE:",
-    data
-  );
-
-
-  console.log(
-    "ERROR UPDATE:",
-    error
-  );
-
-
-
-  if(error){
-
-    console.error(
-      "Error actualizando estado:",
-      error
-    );
-
-    return;
-
-  }
-
-
-
-  if(!data || data.length === 0){
-
-    console.error(
-      "No encontró producto con ID:",
-      id
-    );
-
-    return;
-
-  }
-
-
-
-  await useProductStore
-    .getState()
-    .loadProducts();
-
-
-
-  if(typeof window !== "undefined"){
-
-    window.dispatchEvent(
-      new Event(
-        "product-status-change"
-      )
-    );
-
-  }
-
-
-},
-
-
-
-addProduct:async(product)=>{
 
 
 const {
 data,
 error
-}=await supabase
+}
+=
+await supabase
 .from("products")
 .insert({
 
-name:product.name,
+name:
+product.name,
 
-price:product.price,
+price:
+product.price,
 
-image:product.image,
+image:
+product.image,
 
-category:product.category,
+category:
+product.category,
 
-type:product.type,
+type:
+product.type,
 
-gender:product.gender,
+gender:
+product.gender,
 
-description:product.description,
+description:
+product.description,
 
-sizes:product.sizes,
+size:
+product.size,
 
-colors:product.colors,
 
-available:product.available,
+available:
+product.available,
 
-status:product.status,
+status:
+product.status,
 
-tag:product.tag
+tag:
+product.tag,
+
+stock:
+product.stock,
 
 })
 .select()
@@ -287,10 +280,125 @@ tag:product.tag
 
 
 
+
 if(error){
 
 console.error(
-"Error agregando:",
+ "Error agregando producto:",
+ JSON.stringify(error, null, 2)
+);
+
+return;
+
+}
+
+
+
+
+const newProduct =
+mapProduct(data);
+
+
+
+
+set((state)=>({
+
+productsAdded:[
+newProduct,
+...state.productsAdded
+],
+
+
+productStatus:{
+...state.productStatus,
+
+[newProduct.id]:
+newProduct.status
+
+}
+
+}));
+
+
+
+},
+
+
+
+
+
+
+updateProduct:
+async(
+product: Product
+)=>{
+
+
+if(!supabase){
+return;
+}
+
+
+
+const {
+error
+}
+=
+await supabase
+.from("products")
+.update({
+
+name:
+product.name,
+
+price:
+product.price,
+
+image:
+product.image,
+
+category:
+product.category,
+
+type:
+product.type,
+
+gender:
+product.gender,
+
+description:
+product.description,
+
+size:
+product.size,
+
+colors:
+product.colors,
+
+available:
+product.available,
+
+status:
+product.status,
+
+tag:
+product.tag,
+
+stock:
+product.stock,
+
+})
+.eq(
+"id",
+product.id
+);
+
+
+
+if(error){
+
+console.error(
+"Error actualizando producto:",
 error
 );
 
@@ -300,19 +408,33 @@ return;
 
 
 
-if(data){
 
 set((state)=>({
 
-productsAdded:[
-mapProduct(data),
-...state.productsAdded
-]
+productsAdded:
+state.productsAdded.map(
 
+(item)=>
+
+item.id === product.id
+?
+product
+:
+item
+
+),
+
+
+productStatus:{
+...state.productStatus,
+
+[product.id]:
+product.status
+
+}
 
 }));
 
-}
 
 
 },
@@ -322,17 +444,33 @@ mapProduct(data),
 
 
 
-updateProduct:async(
+updateStatus:
+async(
 id,
-product
+status
 )=>{
+
+
+if(!supabase){
+return;
+}
+
 
 
 const {
 error
-}=await supabase
+}
+=
+await supabase
 .from("products")
-.update(product)
+.update({
+
+status,
+
+available:
+status !== "Vendido"
+
+})
 .eq(
 "id",
 id
@@ -343,7 +481,7 @@ id
 if(error){
 
 console.error(
-"Error actualizando:",
+"Error actualizando estado:",
 error
 );
 
@@ -353,9 +491,46 @@ return;
 
 
 
-await useProductStore
-.getState()
-.loadProducts();
+set((state)=>({
+
+productsAdded:
+state.productsAdded.map(
+
+(product)=>
+
+product.id===id
+
+?
+
+{
+
+...product,
+
+status,
+
+available:
+status !== "Vendido"
+
+}
+
+:
+
+product
+
+),
+
+
+
+productStatus:{
+...state.productStatus,
+
+[id]:
+status
+
+}
+
+}));
+
 
 
 },
@@ -365,12 +540,24 @@ await useProductStore
 
 
 
-deleteProduct:async(id)=>{
+
+deleteProduct:
+async(
+id
+)=>{
+
+
+if(!supabase){
+return;
+}
+
 
 
 const {
 error
-}=await supabase
+}
+=
+await supabase
 .from("products")
 .delete()
 .eq(
@@ -383,7 +570,7 @@ id
 if(error){
 
 console.error(
-"Error eliminando:",
+"Error eliminando producto:",
 error
 );
 
@@ -397,9 +584,26 @@ set((state)=>({
 
 productsAdded:
 state.productsAdded.filter(
+
 (product)=>
-product.id!==id
+product.id !== id
+
+),
+
+
+productStatus:
+Object.fromEntries(
+
+Object.entries(
+state.productStatus
 )
+.filter(
+([key])=>
+Number(key)!==id
+)
+
+)
+
 
 }));
 
@@ -409,4 +613,19 @@ product.id!==id
 
 
 
-}));
+
+
+}),
+
+
+{
+
+name:
+"nexa-products-storage"
+
+}
+
+
+)
+
+);

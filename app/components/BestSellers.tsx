@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { useEffect } from "react";
 import { useProductStore } from "../../lib/product-store";
 
 
@@ -13,17 +12,6 @@ const productsAdded = useProductStore(
   (state) => state.productsAdded
 );
 
-
-const loadProducts = useProductStore(
-  (state) => state.loadProducts
-);
-
-
-useEffect(() => {
-
-  loadProducts();
-
-}, [loadProducts]);
 
 
 const bestProducts = productsAdded.slice(0, 4);
@@ -80,7 +68,13 @@ const bestProducts = productsAdded.slice(0, 4);
 
 
 
-          {bestProducts.map((product) => (
+          {bestProducts.map((product) => {
+
+  if(product.id === undefined){
+    return null;
+  }
+
+  return (
 
 
 
@@ -117,7 +111,12 @@ const bestProducts = productsAdded.slice(0, 4);
 
                   <Image
 
-                    src={product.image}
+                    src={
+  product.image &&
+  product.image.trim() !== ""
+    ? product.image
+    : "/images/products/default.jpg"
+}
 
                     alt={product.name}
 
@@ -291,7 +290,9 @@ const bestProducts = productsAdded.slice(0, 4);
 
 
 
-          ))}
+                  );
+
+          })}
 
 
 

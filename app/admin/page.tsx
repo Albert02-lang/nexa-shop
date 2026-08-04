@@ -1,18 +1,22 @@
+
 "use client";
 
 import {
-  useEffect,
   useState,
 } from "react";
 
-import type { Product } from "../../data/products";
+
+import type { Product } from "../../types/product";
+
 
 import { useProductStore } from "../../lib/product-store";
+
 
 import AddProductForm from "../components/AddProductForm";
 import AdminDashboard from "../components/AdminDashboard";
 import EditProductModal from "../components/EditProductModal";
 import AdminProductCard from "../components/AdminProductCard";
+
 
 
 
@@ -55,17 +59,14 @@ export default function AdminPage() {
 
 
 
-  const loadProducts =
-    useProductStore(
-      (state)=>state.loadProducts
-    );
-
 
 
   const updateStatus =
     useProductStore(
       (state)=>state.updateStatus
     );
+
+
 
 
 
@@ -78,72 +79,8 @@ export default function AdminPage() {
 
 
 
-
-  useEffect(()=>{
-
-
-    loadProducts();
-
-
-
-
-    const syncProducts = ()=>{
-
-
-      loadProducts();
-
-
-    };
-
-
-
-
-
-    window.addEventListener(
-
-      "product-status-change",
-
-      syncProducts
-
-    );
-
-
-
-
-
-
-    return ()=>{
-
-
-      window.removeEventListener(
-
-        "product-status-change",
-
-        syncProducts
-
-      );
-
-
-    };
-
-
-
-  },[loadProducts]);
-
-
-
-
-
-
-
-
-  const allProducts = [
-
-    ...productsAdded,
-
-  ];
-
-
+  const allProducts =
+    productsAdded;
 
 
 
@@ -156,26 +93,15 @@ export default function AdminPage() {
       (product)=>{
 
 
-
-        const currentStatus =
-
-          product.status ??
-          "Disponible";
-
-
-
-
-
         const matchesSearch =
 
           product.name
-          .toLowerCase()
-          .includes(
+            .toLowerCase()
+            .includes(
 
-            search.toLowerCase()
+              search.toLowerCase()
 
-          );
-
+            );
 
 
 
@@ -187,9 +113,7 @@ export default function AdminPage() {
 
           ||
 
-          currentStatus === filterStatus;
-
-
+          product.status === filterStatus;
 
 
 
@@ -202,8 +126,6 @@ export default function AdminPage() {
           ||
 
           product.type?.trim() === filterType;
-
-
 
 
 
@@ -224,10 +146,14 @@ export default function AdminPage() {
         );
 
 
-
       }
 
     );
+
+
+
+
+
   const sortedProducts =
 
     [...filteredProducts].sort(
@@ -253,7 +179,6 @@ export default function AdminPage() {
 
 
 
-
         if(sortBy === "precio-mayor"){
 
           return b.price - a.price;
@@ -262,7 +187,7 @@ export default function AdminPage() {
 
 
 
-        return b.id - a.id;
+        return (b.id ?? 0) - (a.id ?? 0);
 
 
       }
@@ -273,10 +198,9 @@ export default function AdminPage() {
 
 
 
-
-
   const totalProducts =
     allProducts.length;
+
 
 
 
@@ -318,14 +242,7 @@ export default function AdminPage() {
         product.status === "Vendido"
 
     ).length;
-
-
-
-
-
-
-
-
+    
   return (
 
     <main className="min-h-screen bg-gray-100 py-20">
@@ -365,6 +282,7 @@ export default function AdminPage() {
 
 
 
+
         <AddProductForm />
 
 
@@ -373,7 +291,10 @@ export default function AdminPage() {
 
 
 
+
         <div className="mb-10 grid gap-4 md:grid-cols-2">
+
+
 
 
 
@@ -398,6 +319,8 @@ export default function AdminPage() {
 
 
 
+
+
           <select
 
             value={filterStatus}
@@ -414,11 +337,13 @@ export default function AdminPage() {
 
           >
 
+
             <option value="Todos">
 
               Todos los estados
 
             </option>
+
 
 
             <option value="Disponible">
@@ -428,11 +353,13 @@ export default function AdminPage() {
             </option>
 
 
+
             <option value="En trato">
 
               En trato
 
             </option>
+
 
 
             <option value="Vendido">
@@ -443,6 +370,8 @@ export default function AdminPage() {
 
 
           </select>
+
+
 
 
 
@@ -465,11 +394,14 @@ export default function AdminPage() {
 
           >
 
+
+
             <option value="Todos">
 
               Todos los tipos
 
             </option>
+
 
             <option value="Playera">
 
@@ -477,11 +409,13 @@ export default function AdminPage() {
 
             </option>
 
+
             <option value="Sudadera">
 
               Sudadera
 
             </option>
+
 
             <option value="Jeans">
 
@@ -489,11 +423,13 @@ export default function AdminPage() {
 
             </option>
 
+
             <option value="Chamarra">
 
               Chamarra
 
             </option>
+
 
             <option value="Calzado">
 
@@ -501,13 +437,17 @@ export default function AdminPage() {
 
             </option>
 
+
             <option value="Accesorio">
 
               Accesorio
 
             </option>
 
+
           </select>
+
+
 
 
 
@@ -530,11 +470,14 @@ export default function AdminPage() {
 
           >
 
+
+
             <option value="recientes">
 
               Más recientes
 
             </option>
+
 
 
             <option value="nombre">
@@ -544,11 +487,13 @@ export default function AdminPage() {
             </option>
 
 
+
             <option value="precio-menor">
 
               Precio menor
 
             </option>
+
 
 
             <option value="precio-mayor">
@@ -563,7 +508,10 @@ export default function AdminPage() {
 
 
 
+
         </div>
+
+
 
 
 
@@ -581,7 +529,11 @@ export default function AdminPage() {
 
 
 
+
+
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+
+
 
 
 
@@ -596,20 +548,19 @@ export default function AdminPage() {
 
                 product={product}
 
-                currentStatus={
-                  product.status ??
-                  "Disponible"
-                }
 
                 onStatusChange={
                   updateStatus
                 }
 
+
                 onEdit={
                   setSelectedProduct
                 }
 
+
                 onDelete={
+
                   async(id)=>{
 
 
@@ -628,7 +579,9 @@ export default function AdminPage() {
 
 
                   }
+
                 }
+
 
               />
 
@@ -639,7 +592,11 @@ export default function AdminPage() {
 
 
 
+
+
         </div>
+
+
 
 
 
@@ -650,13 +607,18 @@ export default function AdminPage() {
 
           product={selectedProduct}
 
+
           onClose={()=>
+
 
             setSelectedProduct(null)
 
+
           }
 
+
         />
+
 
 
 
@@ -671,3 +633,4 @@ export default function AdminPage() {
 
 
 }
+
