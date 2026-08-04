@@ -4,6 +4,7 @@ import Link from "next/link";
 import { supabase } from "../../../lib/supabase";
 import ProductStatus from "../../components/ProductStatus";
 
+export const dynamic = "force-dynamic";
 
 export default async function CategoryPage({
   params,
@@ -21,10 +22,18 @@ export default async function CategoryPage({
 
 
 
-const { data } = await supabase!
+const { data, error } = await supabase
   .from("products")
   .select("*")
   .eq("gender", categoryName);
+
+
+if (error) {
+  console.error(
+    "Error cargando categoría:",
+    error
+  );
+}
 
 
 const categoryProducts = data ?? [];
