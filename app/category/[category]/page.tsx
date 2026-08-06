@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { supabase } from "../../../lib/supabase";
+import { supabaseServer } from "../../../lib/supabase-server";
 import ProductStatus from "../../components/ProductStatus";
-
+import type { Product } from "../../../types/product";
 export const dynamic = "force-dynamic";
 
 export default async function CategoryPage({
@@ -22,7 +22,7 @@ export default async function CategoryPage({
 
 
 
-const { data, error } = await supabase
+const { data, error } = await supabaseServer
   .from("products")
   .select("*")
   .eq("gender", categoryName);
@@ -36,7 +36,25 @@ if (error) {
 }
 
 
-const categoryProducts = data ?? [];
+const categoryProducts: Product[] =
+  (data ?? []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    price: Number(item.price ?? 0),
+    oldPrice: item.oldPrice ?? undefined,
+    image: item.image,
+    category: item.category,
+    type: item.type ?? "",
+    gender: item.gender ?? "",
+    description: item.description ?? "",
+    size: item.size ?? undefined,
+    sizes: item.sizes ?? [],
+    colors: item.colors ?? [],
+    available: item.available ?? true,
+    status: item.status ?? "Disponible",
+    tag: item.tag ?? undefined,
+    stock: item.stock ?? undefined,
+  }));
 
 
   return (

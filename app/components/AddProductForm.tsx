@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../lib/supabase-client";
 import { useProductStore } from "../../lib/product-store";
 
 import type { NewProduct } from "../../types/product";

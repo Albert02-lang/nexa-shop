@@ -3,8 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { supabase } from "./supabase";
-
+import { supabase } from "./supabase-client";
 import type {
   Product,
   NewProduct,

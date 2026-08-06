@@ -1,7 +1,6 @@
 import Image from "next/image";
 
-
-import { supabase } from "../../../lib/supabase";
+import { supabaseServer } from "../../../lib/supabase-server";
 
 
 import ProductStatusClient from "../../components/ProductStatusClient";
@@ -31,44 +30,16 @@ id:string
 
 
 
-const {id}=await params;
-
-
-
-
-
-if(!supabase){
-
-return null;
-
-}
-
-
-
-
-
+const { id } = await params;
 
 const {
-
-data,
-
-error
-
-}=await supabase
-
-.from("products")
-
-.select("*")
-
-.eq(
-
-"id",
-
-Number(id)
-
-)
-
-.single();
+  data,
+  error,
+} = await supabaseServer
+  .from("products")
+  .select("*")
+  .eq("id", Number(id))
+  .single();
 
 
 
