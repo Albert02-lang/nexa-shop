@@ -108,7 +108,12 @@ export default function AddProductForm() {
         const fileName =
           `${Date.now()}-${imageFile.name}`;
 
-
+if (!supabase) {
+  setMessage(
+    "❌ Supabase no está configurado."
+  );
+  return;
+}
 
         const {
           error: uploadError

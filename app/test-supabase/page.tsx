@@ -9,6 +9,12 @@ export default function TestSupabase() {
   useEffect(() => {
     async function testConnection() {
       try {
+        if (!supabase) {
+  setResult(
+    "Falta configuración de Supabase"
+  );
+  return;
+}
         const { data, error } = await supabase
           .from("products")
           .select("*");
