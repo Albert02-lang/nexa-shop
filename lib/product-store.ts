@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { supabase } from "./supabase-client";
+import { getSupabaseClient } from "./supabase-client";
 import type {
   Product,
   NewProduct,
@@ -137,6 +137,8 @@ loadProducts:
 async () => {
 
 
+  const supabase =
+    getSupabaseClient();
 if (!supabase) {
 return;
 }
@@ -218,6 +220,8 @@ async (
 product: NewProduct
 ) => {
 
+const supabase =
+    getSupabaseClient();
 
 if(!supabase){
 return;
@@ -331,6 +335,8 @@ async(
 product: Product
 )=>{
 
+const supabase =
+    getSupabaseClient();
 
 if(!supabase){
 return;
@@ -448,7 +454,8 @@ id,
 status
 )=>{
 
-
+const supabase =
+    getSupabaseClient();
 if(!supabase){
 return;
 }
@@ -544,7 +551,9 @@ async(
 id
 )=>{
 
-
+const supabase =
+    getSupabaseClient();
+    
 if(!supabase){
 return;
 }

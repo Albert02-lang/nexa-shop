@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase-client";
+import { getSupabaseClient } from "../../lib/supabase-client";
 
 export default function TestSupabase() {
 
@@ -11,10 +11,9 @@ export default function TestSupabase() {
 
     async function testConnection() {
 
-      if (!supabase) {
-  console.error("Supabase no está configurado");
-  return;
-}
+     const supabase =
+  getSupabaseClient();
+  
       const { data, error } = await supabase
         .from("products")
         .select("*");
