@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { supabaseServer } from "../../../lib/supabase-server";
+import { getSupabaseServer } from "../../../lib/supabase-server";
 
 
 import ProductStatusClient from "../../components/ProductStatusClient";
@@ -31,6 +31,9 @@ id:string
 
 
 const { id } = await params;
+
+const supabaseServer =
+  getSupabaseServer();
 
 const {
   data,
