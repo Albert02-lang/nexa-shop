@@ -160,17 +160,16 @@ ascending:false
 
 
 
-if(error){
-
-console.error(
-"Error cargando productos:",
-error
-);
-
-return;
-
+if (error) {
+  console.error(
+    "Error cargando productos:",
+    error.message,
+    error.details,
+    error.hint,
+    error.code
+  );
+  return;
 }
-
 
 
 const products =
