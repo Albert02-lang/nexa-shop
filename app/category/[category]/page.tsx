@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { supabaseServer } from "../../../lib/supabase-server";
+import { getSupabaseServer } from "../../../lib/supabase-server";
 import ProductStatus from "../../components/ProductStatus";
 import type { Product } from "../../../types/product";
 export const dynamic = "force-dynamic";
@@ -22,10 +22,14 @@ export default async function CategoryPage({
 
 
 
-const { data, error } = await supabaseServer
-  .from("products")
-  .select("*")
-  .eq("gender", categoryName);
+const supabaseServer =
+  getSupabaseServer();
+
+const { data, error } =
+  await supabaseServer
+    .from("products")
+    .select("*")
+    .eq("gender", categoryName);
 
 
 if (error) {
