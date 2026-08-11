@@ -4,65 +4,55 @@ import { useEffect } from "react";
 
 import { useProductStore } from "../../lib/product-store";
 
-
-
 export default function ProductSync() {
-
-
   const loadProducts =
     useProductStore(
-      (state)=>state.loadProducts
+      (state) => state.loadProducts
     );
 
+  useEffect(() => {
+    let mounted = true;
 
+    const load = async () => {
+      try {
+        await loadProducts();
+      } catch (error) {
+        if (!mounted) return;
 
-  useEffect(()=>{
-
-
-    // Carga inicial al abrir la tienda
-    loadProducts();
-
-
-
-    const syncProducts = async()=>{
-
-
-      await loadProducts();
-
-
+        console.error(
+          "Error cargando productos:",
+          error
+        );
+      }
     };
 
+    load();
 
+    const syncProducts = async () => {
+      try {
+        await loadProducts();
+      } catch (error) {
+        console.error(
+          "Error sincronizando productos:",
+          error
+        );
+      }
+    };
 
     window.addEventListener(
-
       "product-status-change",
-
       syncProducts
-
     );
 
-
-
-    return()=>{
-
+    return () => {
+      mounted = false;
 
       window.removeEventListener(
-
         "product-status-change",
-
         syncProducts
-
       );
-
-
     };
-
-
-  },[loadProducts]);
-
-
+  }, [loadProducts]);
 
   return null;
-
 }
