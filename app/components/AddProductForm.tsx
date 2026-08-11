@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getSupabaseClient } from "../../lib/supabase-client";
+import { supabase } from "../../lib/supabase-client";
 import { useProductStore } from "../../lib/product-store";
 
 import type { NewProduct } from "../../types/product";
@@ -109,9 +109,6 @@ export default function AddProductForm() {
           `${Date.now()}-${imageFile.name}`;
 
 
-
-const supabase =
-  getSupabaseClient();
 
         const {
           error: uploadError

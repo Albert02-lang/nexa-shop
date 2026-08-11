@@ -1,78 +1,45 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSupabaseClient } from "../../lib/supabase-client";
+import { supabase } from "../../lib/supabase-client";
 
 export default function TestSupabase() {
-  const [result, setResult] = useState(
-    "Conectando con Supabase..."
-  );
+  const [result, setResult] = useState("Comprobando conexión...");
 
   useEffect(() => {
     async function testConnection() {
       try {
-        const supabase =
-          getSupabaseClient();
-
-        setResult(
-          "Cliente Supabase creado. Consultando productos..."
-        );
-
-        const timeout = new Promise<never>(
-          (_, reject) =>
-            setTimeout(
-              () =>
-                reject(
-                  new Error(
-                    "La consulta a Supabase tardó más de 10 segundos."
-                  )
-                ),
-              10000
-            )
-        );
-
-        const query =
-          supabase
-            .from("products")
-            .select("*");
-
-        const { data, error } =
-          await Promise.race([
-            query,
-            timeout,
-          ]);
+        const { data, error } = await supabase
+          .from("products")
+          .select("*");
 
         if (error) {
+          console.error("Error Supabase:", error);
+
           setResult(
-            `Error Supabase: ${error.message}`
+            "Error Supabase: " + error.message
           );
-          console.error(
-            "Error Supabase:",
-            error
-          );
+
           return;
         }
 
         setResult(
-          `Productos encontrados: ${
-            data?.length ?? 0
-          }`
+          "Productos encontrados: " +
+          (data?.length ?? 0)
         );
 
         console.log(
-          "Productos:",
+          "Productos encontrados:",
           data
         );
       } catch (error) {
         console.error(
-          "Error de conexión:",
+          "Error conectando con Supabase:",
           error
         );
 
         setResult(
-          error instanceof Error
-            ? error.message
-            : "Error desconocido"
+          "Error conectando con Supabase"
         );
       }
     }
@@ -81,14 +48,16 @@ export default function TestSupabase() {
   }, []);
 
   return (
-    <main className="p-10">
-      <h1 className="text-3xl font-bold">
-        Prueba Supabase
-      </h1>
+    <main className="min-h-screen bg-gray-50 p-10">
+      <div className="mx-auto max-w-3xl rounded-3xl bg-white p-8 shadow">
+        <h1 className="text-3xl font-black text-black">
+          Prueba Supabase
+        </h1>
 
-      <p className="mt-5">
-        {result}
-      </p>
+        <p className="mt-5 text-lg text-gray-700">
+          {result}
+        </p>
+      </div>
     </main>
   );
 }
