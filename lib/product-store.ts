@@ -74,8 +74,6 @@ function mapProduct(
     size:
       item.size ?? undefined,
 
-    sizes:
-      item.sizes ?? [],
 
     colors:
       Array.isArray(item.colors)
@@ -224,8 +222,6 @@ export const useProductStore =
                     size:
                       product.size,
 
-                    sizes:
-                      product.sizes,
 
                     colors:
                       product.colors,
@@ -306,8 +302,7 @@ export const useProductStore =
                     size:
                       product.size,
 
-                    sizes:
-                      product.sizes,
+                    
 
                     colors:
                       product.colors,

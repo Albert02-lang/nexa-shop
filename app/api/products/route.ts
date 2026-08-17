@@ -1,14 +1,26 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServer } from "../../../lib/supabase-server";
 
+
+// =====================================================
+// GET — OBTENER TODOS LOS PRODUCTOS
+// =====================================================
+
 export async function GET() {
   try {
-    const supabase = getSupabaseServer();
+    const supabase =
+      getSupabaseServer();
 
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("id", { ascending: false });
+    const { data, error } =
+      await supabase
+        .from("products")
+        .select("*")
+        .order(
+          "id",
+          {
+            ascending: false,
+          }
+        );
 
     if (error) {
       console.error(
@@ -18,7 +30,8 @@ export async function GET() {
 
       return NextResponse.json(
         {
-          error: error.message,
+          error:
+            error.message,
         },
         {
           status: 500,
@@ -49,6 +62,11 @@ export async function GET() {
   }
 }
 
+
+// =====================================================
+// POST — CREAR PRODUCTO
+// =====================================================
+
 export async function POST(
   request: Request
 ) {
@@ -63,22 +81,45 @@ export async function POST(
       await supabase
         .from("products")
         .insert({
-          name: body.name,
-          price: body.price,
-          image: body.image,
-          category: body.category,
-          type: body.type,
-          gender: body.gender,
+          name:
+            body.name,
+
+          price:
+            body.price,
+
+          image:
+            body.image,
+
+          category:
+            body.category,
+
+          type:
+            body.type,
+
+          gender:
+            body.gender,
+
           description:
             body.description,
-          size: body.size,
-          sizes: body.sizes,
-          colors: body.colors,
+
+          size:
+            body.size,
+
+       
+          colors:
+            body.colors,
+
           available:
             body.available,
-          status: body.status,
-          tag: body.tag,
-          stock: body.stock,
+
+          status:
+            body.status,
+
+          tag:
+            body.tag,
+
+          stock:
+            body.stock,
         })
         .select()
         .single();
@@ -91,7 +132,8 @@ export async function POST(
 
       return NextResponse.json(
         {
-          error: error.message,
+          error:
+            error.message,
         },
         {
           status: 500,
@@ -125,6 +167,11 @@ export async function POST(
   }
 }
 
+
+// =====================================================
+// PUT — EDITAR PRODUCTO
+// =====================================================
+
 export async function PUT(
   request: Request
 ) {
@@ -135,11 +182,14 @@ export async function PUT(
     const body =
       await request.json();
 
-    if (!body.id) {
+    const id =
+      Number(body.id);
+
+    if (!id) {
       return NextResponse.json(
         {
           error:
-            "Falta el id del producto",
+            "ID de producto no válido",
         },
         {
           status: 400,
@@ -151,26 +201,49 @@ export async function PUT(
       await supabase
         .from("products")
         .update({
-          name: body.name,
-          price: body.price,
-          image: body.image,
-          category: body.category,
-          type: body.type,
-          gender: body.gender,
+          name:
+            body.name,
+
+          price:
+            body.price,
+
+          image:
+            body.image,
+
+          category:
+            body.category,
+
+          type:
+            body.type,
+
+          gender:
+            body.gender,
+
           description:
             body.description,
-          size: body.size,
-          sizes: body.sizes,
-          colors: body.colors,
+
+          size:
+            body.size,
+
+          
+          colors:
+            body.colors,
+
           available:
             body.available,
-          status: body.status,
-          tag: body.tag,
-          stock: body.stock,
+
+          status:
+            body.status,
+
+          tag:
+            body.tag,
+
+          stock:
+            body.stock,
         })
         .eq(
           "id",
-          Number(body.id)
+          id
         )
         .select()
         .single();
@@ -183,7 +256,8 @@ export async function PUT(
 
       return NextResponse.json(
         {
-          error: error.message,
+          error:
+            error.message,
         },
         {
           status: 500,
@@ -191,7 +265,9 @@ export async function PUT(
       );
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json(
+      data
+    );
   } catch (error) {
     console.error(
       "Error en PUT /api/products:",
@@ -212,6 +288,11 @@ export async function PUT(
   }
 }
 
+
+// =====================================================
+// PATCH — CAMBIAR ESTADO DEL PRODUCTO
+// =====================================================
+
 export async function PATCH(
   request: Request
 ) {
@@ -222,11 +303,17 @@ export async function PATCH(
     const body =
       await request.json();
 
-    if (!body.id) {
+    const id =
+      Number(body.id);
+
+    const status =
+      body.status;
+
+    if (!id) {
       return NextResponse.json(
         {
           error:
-            "Falta el id del producto",
+            "ID de producto no válido",
         },
         {
           status: 400,
@@ -234,11 +321,18 @@ export async function PATCH(
       );
     }
 
-    if (!body.status) {
+    if (
+      status !==
+        "Disponible" &&
+      status !==
+        "En trato" &&
+      status !==
+        "Vendido"
+    ) {
       return NextResponse.json(
         {
           error:
-            "Falta el estado del producto",
+            "Estado de producto no válido",
         },
         {
           status: 400,
@@ -250,13 +344,15 @@ export async function PATCH(
       await supabase
         .from("products")
         .update({
-          status: body.status,
+          status,
+
           available:
-            body.status !== "Vendido",
+            status !==
+            "Vendido",
         })
         .eq(
           "id",
-          Number(body.id)
+          id
         )
         .select()
         .single();
@@ -269,7 +365,8 @@ export async function PATCH(
 
       return NextResponse.json(
         {
-          error: error.message,
+          error:
+            error.message,
         },
         {
           status: 500,
@@ -277,7 +374,9 @@ export async function PATCH(
       );
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json(
+      data
+    );
   } catch (error) {
     console.error(
       "Error en PATCH /api/products:",
@@ -298,6 +397,11 @@ export async function PATCH(
   }
 }
 
+
+// =====================================================
+// DELETE — ELIMINAR PRODUCTO
+// =====================================================
+
 export async function DELETE(
   request: Request
 ) {
@@ -308,11 +412,14 @@ export async function DELETE(
     const body =
       await request.json();
 
-    if (!body.id) {
+    const id =
+      Number(body.id);
+
+    if (!id) {
       return NextResponse.json(
         {
           error:
-            "Falta el id del producto",
+            "ID de producto no válido",
         },
         {
           status: 400,
@@ -326,7 +433,7 @@ export async function DELETE(
         .delete()
         .eq(
           "id",
-          Number(body.id)
+          id
         );
 
     if (error) {
@@ -337,7 +444,8 @@ export async function DELETE(
 
       return NextResponse.json(
         {
-          error: error.message,
+          error:
+            error.message,
         },
         {
           status: 500,
