@@ -1,29 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase-client";
 
 export default function TestSupabase() {
-  const [result, setResult] = useState("Comprobando conexión...");
+  const [result, setResult] = useState(
+    "Comprobando conexión..."
+  );
 
   useEffect(() => {
     async function testConnection() {
       try {
-        if (!supabase) {
-  setResult(
-    "Falta configuración de Supabase"
-  );
-  return;
-}
-        const { data, error } = await supabase
-          .from("products")
-          .select("*");
+        const response = await fetch(
+          "/api/products",
+          {
+            cache: "no-store",
+          }
+        );
 
-        if (error) {
-          console.error("Error Supabase:", error);
+        const data = await response.json();
 
+        if (!response.ok) {
           setResult(
-            "Error Supabase: " + error.message
+            "Error Supabase: " +
+              (data?.error ?? "Error desconocido")
           );
 
           return;
@@ -31,7 +30,7 @@ export default function TestSupabase() {
 
         setResult(
           "Productos encontrados: " +
-          (data?.length ?? 0)
+            (data?.length ?? 0)
         );
 
         console.log(
@@ -40,7 +39,7 @@ export default function TestSupabase() {
         );
       } catch (error) {
         console.error(
-          "Error conectando con Supabase:",
+          "Error conectando con la API:",
           error
         );
 
