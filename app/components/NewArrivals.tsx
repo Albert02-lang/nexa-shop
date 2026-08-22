@@ -15,7 +15,7 @@ const newProducts = productsAdded.slice(0,4);
 
   return (
 
-    <section className="bg-white py-20">
+    <section className="bg-transparent py-20">
 
 
       <div className="mx-auto max-w-7xl px-6">
@@ -33,15 +33,15 @@ const newProducts = productsAdded.slice(0,4);
 
 
 
-          <h2 className="mt-3 text-4xl font-black text-black">
-            🆕 Novedades 2026
-          </h2>
+          <h2 className="mt-3 text-4xl font-black text-slate-900 dark:text-white">
+  🆕 Novedades 2026
+</h2>
 
 
 
-          <p className="mx-auto mt-4 max-w-2xl text-gray-600">
-            Descubre las últimas prendas agregadas a Nexa Shop.
-          </p>
+          <p className="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-300">
+  Descubre las últimas prendas agregadas a Nexa Shop.
+</p>
 
 
         </div>
@@ -57,11 +57,11 @@ const newProducts = productsAdded.slice(0,4);
 
           <div className="rounded-3xl bg-gray-50 p-10 text-center shadow-sm">
 
-            <h3 className="text-xl font-bold text-black">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
               Próximamente nuevas prendas
             </h3>
 
-            <p className="mt-3 text-gray-600">
+            <p className="mt-3 text-slate-600 dark:text-slate-300">
               Estamos preparando nuevos productos para ti.
             </p>
 

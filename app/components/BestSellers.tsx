@@ -17,7 +17,7 @@ const productsAdded = useProductStore(
 const bestProducts = productsAdded.slice(0, 4);
   return (
 
-    <section className="bg-gray-50 py-20">
+    <section className="bg-transparent py-20">
 
 
       <div className="mx-auto max-w-7xl px-6">
@@ -37,7 +37,7 @@ const bestProducts = productsAdded.slice(0, 4);
 
 
 
-          <h2 className="mt-3 text-4xl font-black text-black">
+          <h2 className="mt-3 text-4xl font-black text-slate-900 dark:text-white">
 
             🏆 Productos más vendidos
 
@@ -45,7 +45,7 @@ const bestProducts = productsAdded.slice(0, 4);
 
 
 
-          <p className="mx-auto mt-4 max-w-2xl text-gray-600">
+          <p className="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-300">
 
             Conoce las prendas que más destacan por su estilo,
             comodidad y popularidad.

@@ -1,6 +1,24 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServer } from "../../../lib/supabase-server";
+import {
+  COOKIE_NAME,
+  isAdminSessionValid,
+} from "../../../lib/admin-auth";
 
+// =====================================================
+// COMPROBAR AUTENTICACIÓN DEL ADMINISTRADOR
+// =====================================================
+
+async function requireAdmin() {
+  const { cookies } = await import("next/headers");
+
+  const cookieStore = await cookies();
+
+  const session =
+    cookieStore.get(COOKIE_NAME)?.value;
+
+  return isAdminSessionValid(session);
+}
 
 // =====================================================
 // GET — OBTENER TODOS LOS PRODUCTOS
@@ -8,19 +26,14 @@ import { getSupabaseServer } from "../../../lib/supabase-server";
 
 export async function GET() {
   try {
-    const supabase =
-      getSupabaseServer();
+    const supabase = getSupabaseServer();
 
-    const { data, error } =
-      await supabase
-        .from("products")
-        .select("*")
-        .order(
-          "id",
-          {
-            ascending: false,
-          }
-        );
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("id", {
+        ascending: false,
+      });
 
     if (error) {
       console.error(
@@ -30,8 +43,7 @@ export async function GET() {
 
       return NextResponse.json(
         {
-          error:
-            error.message,
+          error: error.message,
         },
         {
           status: 500,
@@ -39,9 +51,7 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json(
-      data ?? []
-    );
+    return NextResponse.json(data ?? []);
   } catch (error) {
     console.error(
       "Error en GET /api/products:",
@@ -62,7 +72,6 @@ export async function GET() {
   }
 }
 
-
 // =====================================================
 // POST — CREAR PRODUCTO
 // =====================================================
@@ -70,59 +79,41 @@ export async function GET() {
 export async function POST(
   request: Request
 ) {
+  if (!(await requireAdmin())) {
+    return NextResponse.json(
+      {
+        error: "No autorizado.",
+      },
+      {
+        status: 401,
+      }
+    );
+  }
+
   try {
-    const supabase =
-      getSupabaseServer();
+    const supabase = getSupabaseServer();
 
-    const body =
-      await request.json();
+    const body = await request.json();
 
-    const { data, error } =
-      await supabase
-        .from("products")
-        .insert({
-          name:
-            body.name,
-
-          price:
-            body.price,
-
-          image:
-            body.image,
-
-          category:
-            body.category,
-
-          type:
-            body.type,
-
-          gender:
-            body.gender,
-
-          description:
-            body.description,
-
-          size:
-            body.size,
-
-       
-          colors:
-            body.colors,
-
-          available:
-            body.available,
-
-          status:
-            body.status,
-
-          tag:
-            body.tag,
-
-          stock:
-            body.stock,
-        })
-        .select()
-        .single();
+    const { data, error } = await supabase
+      .from("products")
+      .insert({
+        name: body.name,
+        price: body.price,
+        image: body.image,
+        category: body.category,
+        type: body.type,
+        gender: body.gender,
+        description: body.description,
+        size: body.size,
+        colors: body.colors,
+        available: body.available,
+        status: body.status,
+        tag: body.tag,
+        stock: body.stock,
+      })
+      .select()
+      .single();
 
     if (error) {
       console.error(
@@ -132,8 +123,7 @@ export async function POST(
 
       return NextResponse.json(
         {
-          error:
-            error.message,
+          error: error.message,
         },
         {
           status: 500,
@@ -141,12 +131,9 @@ export async function POST(
       );
     }
 
-    return NextResponse.json(
-      data,
-      {
-        status: 201,
-      }
-    );
+    return NextResponse.json(data, {
+      status: 201,
+    });
   } catch (error) {
     console.error(
       "Error en POST /api/products:",
@@ -167,7 +154,6 @@ export async function POST(
   }
 }
 
-
 // =====================================================
 // PUT — EDITAR PRODUCTO
 // =====================================================
@@ -175,15 +161,23 @@ export async function POST(
 export async function PUT(
   request: Request
 ) {
+  if (!(await requireAdmin())) {
+    return NextResponse.json(
+      {
+        error: "No autorizado.",
+      },
+      {
+        status: 401,
+      }
+    );
+  }
+
   try {
-    const supabase =
-      getSupabaseServer();
+    const supabase = getSupabaseServer();
 
-    const body =
-      await request.json();
+    const body = await request.json();
 
-    const id =
-      Number(body.id);
+    const id = Number(body.id);
 
     if (!id) {
       return NextResponse.json(
@@ -197,56 +191,26 @@ export async function PUT(
       );
     }
 
-    const { data, error } =
-      await supabase
-        .from("products")
-        .update({
-          name:
-            body.name,
-
-          price:
-            body.price,
-
-          image:
-            body.image,
-
-          category:
-            body.category,
-
-          type:
-            body.type,
-
-          gender:
-            body.gender,
-
-          description:
-            body.description,
-
-          size:
-            body.size,
-
-          
-          colors:
-            body.colors,
-
-          available:
-            body.available,
-
-          status:
-            body.status,
-
-          tag:
-            body.tag,
-
-          stock:
-            body.stock,
-        })
-        .eq(
-          "id",
-          id
-        )
-        .select()
-        .single();
+    const { data, error } = await supabase
+      .from("products")
+      .update({
+        name: body.name,
+        price: body.price,
+        image: body.image,
+        category: body.category,
+        type: body.type,
+        gender: body.gender,
+        description: body.description,
+        size: body.size,
+        colors: body.colors,
+        available: body.available,
+        status: body.status,
+        tag: body.tag,
+        stock: body.stock,
+      })
+      .eq("id", id)
+      .select()
+      .single();
 
     if (error) {
       console.error(
@@ -256,8 +220,7 @@ export async function PUT(
 
       return NextResponse.json(
         {
-          error:
-            error.message,
+          error: error.message,
         },
         {
           status: 500,
@@ -265,9 +228,7 @@ export async function PUT(
       );
     }
 
-    return NextResponse.json(
-      data
-    );
+    return NextResponse.json(data);
   } catch (error) {
     console.error(
       "Error en PUT /api/products:",
@@ -288,7 +249,6 @@ export async function PUT(
   }
 }
 
-
 // =====================================================
 // PATCH — CAMBIAR ESTADO DEL PRODUCTO
 // =====================================================
@@ -296,18 +256,25 @@ export async function PUT(
 export async function PATCH(
   request: Request
 ) {
+  if (!(await requireAdmin())) {
+    return NextResponse.json(
+      {
+        error: "No autorizado.",
+      },
+      {
+        status: 401,
+      }
+    );
+  }
+
   try {
-    const supabase =
-      getSupabaseServer();
+    const supabase = getSupabaseServer();
 
-    const body =
-      await request.json();
+    const body = await request.json();
 
-    const id =
-      Number(body.id);
+    const id = Number(body.id);
 
-    const status =
-      body.status;
+    const status = body.status;
 
     if (!id) {
       return NextResponse.json(
@@ -322,12 +289,9 @@ export async function PATCH(
     }
 
     if (
-      status !==
-        "Disponible" &&
-      status !==
-        "En trato" &&
-      status !==
-        "Vendido"
+      status !== "Disponible" &&
+      status !== "En trato" &&
+      status !== "Vendido"
     ) {
       return NextResponse.json(
         {
@@ -340,22 +304,16 @@ export async function PATCH(
       );
     }
 
-    const { data, error } =
-      await supabase
-        .from("products")
-        .update({
-          status,
-
-          available:
-            status !==
-            "Vendido",
-        })
-        .eq(
-          "id",
-          id
-        )
-        .select()
-        .single();
+    const { data, error } = await supabase
+      .from("products")
+      .update({
+        status,
+        available:
+          status !== "Vendido",
+      })
+      .eq("id", id)
+      .select()
+      .single();
 
     if (error) {
       console.error(
@@ -365,8 +323,7 @@ export async function PATCH(
 
       return NextResponse.json(
         {
-          error:
-            error.message,
+          error: error.message,
         },
         {
           status: 500,
@@ -374,9 +331,7 @@ export async function PATCH(
       );
     }
 
-    return NextResponse.json(
-      data
-    );
+    return NextResponse.json(data);
   } catch (error) {
     console.error(
       "Error en PATCH /api/products:",
@@ -397,7 +352,6 @@ export async function PATCH(
   }
 }
 
-
 // =====================================================
 // DELETE — ELIMINAR PRODUCTO
 // =====================================================
@@ -405,15 +359,23 @@ export async function PATCH(
 export async function DELETE(
   request: Request
 ) {
+  if (!(await requireAdmin())) {
+    return NextResponse.json(
+      {
+        error: "No autorizado.",
+      },
+      {
+        status: 401,
+      }
+    );
+  }
+
   try {
-    const supabase =
-      getSupabaseServer();
+    const supabase = getSupabaseServer();
 
-    const body =
-      await request.json();
+    const body = await request.json();
 
-    const id =
-      Number(body.id);
+    const id = Number(body.id);
 
     if (!id) {
       return NextResponse.json(
@@ -427,14 +389,10 @@ export async function DELETE(
       );
     }
 
-    const { error } =
-      await supabase
-        .from("products")
-        .delete()
-        .eq(
-          "id",
-          id
-        );
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", id);
 
     if (error) {
       console.error(
@@ -444,8 +402,7 @@ export async function DELETE(
 
       return NextResponse.json(
         {
-          error:
-            error.message,
+          error: error.message,
         },
         {
           status: 500,

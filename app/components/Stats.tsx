@@ -33,7 +33,7 @@ export default function Stats() {
 
   return (
 
-    <section className="bg-gray-50 py-16">
+<section className="bg-transparent py-16">
 
 
       <div className="mx-auto max-w-7xl px-6">

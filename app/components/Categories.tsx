@@ -33,32 +33,25 @@ export default function Categories() {
 
   return (
 
-    <section className="bg-white py-20">
+    <section className="bg-transparent py-20">
 
 
       <div className="mx-auto max-w-7xl px-6">
 
 
+<div className="mb-12 text-center">
+  <p className="text-sm font-bold uppercase tracking-widest text-blue-600">
+    Encuentra tu estilo
+  </p>
 
-        <div className="mb-12 text-center">
+  <h2 className="mt-3 text-4xl font-black text-slate-900 dark:text-white">
+    Explora nuestras categorías
+  </h2>
 
-
-          <p className="text-sm font-bold uppercase tracking-widest text-blue-600">
-            Encuentra tu estilo
-          </p>
-
-
-          <h2 className="mt-3 text-4xl font-black text-black">
-            Explora nuestras categorías
-          </h2>
-
-
-          <p className="mt-4 text-gray-600">
-            Selecciona tu colección favorita y descubre nuevos estilos.
-          </p>
-
-
-        </div>
+  <p className="mt-4 text-slate-600 dark:text-slate-300">
+    Selecciona tu colección favorita y descubre nuevos estilos.
+  </p>
+</div>
 
 
 

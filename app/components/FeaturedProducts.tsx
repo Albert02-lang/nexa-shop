@@ -124,20 +124,20 @@ export default function FeaturedProducts() {
 
   return (
     <section
-      id="productos"
-      className="bg-gray-50 py-16"
-    >
+  id="productos"
+  className="bg-transparent py-16"
+>
       <div className="mx-auto max-w-7xl px-4">
-        <div className="mb-10 text-center">
-          <h2 className="text-4xl font-black text-black">
-            Productos Destacados
-          </h2>
+       <div className="mb-10 text-center">
+  <h2 className="text-4xl font-black text-slate-900 dark:text-white">
+    Productos Destacados
+  </h2>
 
-          <p className="mt-3 text-gray-600">
-            Encuentra prendas seleccionadas
-            para tu estilo.
-          </p>
-        </div>
+  <p className="mt-3 text-slate-600 dark:text-slate-300">
+    Encuentra prendas seleccionadas
+    para tu estilo.
+  </p>
+</div>
 
         <div className="space-y-6">
           <ProductSearch

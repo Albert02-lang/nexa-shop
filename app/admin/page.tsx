@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -23,18 +22,8 @@ export default function AdminPage() {
   const [checkingAuth, setCheckingAuth] =
     useState(true);
 
-  useEffect(() => {
-    const auth =
-      sessionStorage.getItem(
-        "nexa-admin-auth"
-      );
-
-    if (auth === "true") {
-      setAuthenticated(true);
-    }
-
-    setCheckingAuth(false);
-  }, []);
+  const [darkMode, setDarkMode] =
+    useState(false);
 
   const [selectedProduct, setSelectedProduct] =
     useState<Product | null>(null);
@@ -50,6 +39,65 @@ export default function AdminPage() {
 
   const [sortBy, setSortBy] =
     useState("recientes");
+
+  /* =========================================================
+     AUTENTICACIÓN
+  ========================================================= */
+
+  useEffect(() => {
+    const auth =
+      sessionStorage.getItem(
+        "nexa-admin-auth"
+      );
+
+    if (auth === "true") {
+      setAuthenticated(true);
+    }
+
+    setCheckingAuth(false);
+  }, []);
+
+  /* =========================================================
+     TEMA
+  ========================================================= */
+
+  useEffect(() => {
+    const savedTheme =
+      localStorage.getItem("nexa-theme");
+
+    const isDark =
+      savedTheme === "dark" ||
+      document.documentElement.classList.contains(
+        "dark"
+      );
+
+    setDarkMode(isDark);
+
+    document.documentElement.classList.toggle(
+      "dark",
+      isDark
+    );
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = !darkMode;
+
+    setDarkMode(nextTheme);
+
+    document.documentElement.classList.toggle(
+      "dark",
+      nextTheme
+    );
+
+    localStorage.setItem(
+      "nexa-theme",
+      nextTheme ? "dark" : "light"
+    );
+  };
+
+  /* =========================================================
+     PRODUCTOS
+  ========================================================= */
 
   const productsAdded =
     useProductStore(
@@ -151,10 +199,14 @@ export default function AdminPage() {
         "Vendido"
     ).length;
 
+  /* =========================================================
+     ESTADOS DE CARGA / ACCESO
+  ========================================================= */
+
   if (checkingAuth) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-100">
-        <p className="font-bold text-gray-600">
+      <main className="flex min-h-screen items-center justify-center bg-gray-100 transition-colors duration-300 dark:bg-slate-950">
+        <p className="font-bold text-gray-600 dark:text-slate-300">
           Verificando acceso...
         </p>
       </main>
@@ -171,13 +223,67 @@ export default function AdminPage() {
     );
   }
 
+  /* =========================================================
+     PANEL
+  ========================================================= */
+
   return (
-    <main className="min-h-screen bg-gray-100 py-20">
+    <main className="min-h-screen bg-gray-100 py-20 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-white">
       <div className="mx-auto max-w-7xl px-6">
 
-        <h1 className="mb-10 text-4xl font-black text-black">
-          Panel de Administración
-        </h1>
+        {/* =====================================================
+            ENCABEZADO
+        ===================================================== */}
+
+        <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-blue-600 dark:text-blue-400">
+              Nexa Shop
+            </p>
+
+            <h1 className="text-4xl font-black text-black dark:text-white">
+              Panel de Administración
+            </h1>
+          </div>
+
+          {/* ===================================================
+              BOTÓN DE TEMA
+          =================================================== */}
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={
+              darkMode
+                ? "Cambiar a modo claro"
+                : "Cambiar a modo oscuro"
+            }
+            className="flex w-fit items-center gap-3 rounded-full border border-slate-900/10 bg-white/80 px-3 py-2 shadow-sm backdrop-blur-xl transition hover:border-blue-500 hover:shadow-md dark:border-white/10 dark:bg-slate-900/80"
+          >
+            <span className="theme-toggle-track">
+              <span
+                className={`theme-toggle-thumb ${
+                  darkMode
+                    ? "theme-toggle-thumb-dark"
+                    : ""
+                }`}
+              >
+                {darkMode ? "☀" : "☾"}
+              </span>
+            </span>
+
+            <span className="whitespace-nowrap text-sm font-semibold text-slate-700 dark:text-slate-300">
+              {darkMode
+                ? "Modo claro"
+                : "Modo oscuro"}
+            </span>
+          </button>
+        </div>
+
+        {/* =====================================================
+            DASHBOARD
+        ===================================================== */}
 
         <AdminDashboard
           total={totalProducts}
@@ -186,7 +292,15 @@ export default function AdminPage() {
           sold={soldProducts}
         />
 
+        {/* =====================================================
+            AGREGAR PRODUCTO
+        ===================================================== */}
+
         <AddProductForm />
+
+        {/* =====================================================
+            FILTROS
+        ===================================================== */}
 
         <div className="mb-10 grid gap-4 md:grid-cols-2">
 
@@ -196,7 +310,7 @@ export default function AdminPage() {
               setSearch(e.target.value)
             }
             placeholder="🔎 Buscar producto..."
-            className="rounded-xl border p-3 text-black"
+            className="rounded-xl border border-slate-300 bg-white p-3 text-black outline-none transition focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           />
 
           <select
@@ -206,7 +320,7 @@ export default function AdminPage() {
                 e.target.value
               )
             }
-            className="rounded-xl border p-3 text-black"
+            className="rounded-xl border border-slate-300 bg-white p-3 text-black outline-none transition focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           >
             <option value="Todos">
               Todos los estados
@@ -232,7 +346,7 @@ export default function AdminPage() {
                 e.target.value
               )
             }
-            className="rounded-xl border p-3 text-black"
+            className="rounded-xl border border-slate-300 bg-white p-3 text-black outline-none transition focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           >
             <option value="Todos">
               Todos los tipos
@@ -270,7 +384,7 @@ export default function AdminPage() {
                 e.target.value
               )
             }
-            className="rounded-xl border p-3 text-black"
+            className="rounded-xl border border-slate-300 bg-white p-3 text-black outline-none transition focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           >
             <option value="recientes">
               Más recientes
@@ -291,9 +405,17 @@ export default function AdminPage() {
 
         </div>
 
-        <p className="mb-10 text-gray-600">
+        {/* =====================================================
+            DESCRIPCIÓN
+        ===================================================== */}
+
+        <p className="mb-10 text-gray-600 dark:text-slate-400">
           Gestiona la disponibilidad de tus productos Nexa Shop.
         </p>
+
+        {/* =====================================================
+            PRODUCTOS
+        ===================================================== */}
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
 
@@ -330,6 +452,10 @@ export default function AdminPage() {
 
         </div>
 
+        {/* =====================================================
+            MODAL DE EDICIÓN
+        ===================================================== */}
+
         <EditProductModal
           product={selectedProduct}
           onClose={() =>
@@ -341,4 +467,3 @@ export default function AdminPage() {
     </main>
   );
 }
-

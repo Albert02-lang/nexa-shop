@@ -1,10 +1,18 @@
 import { NextResponse } from "next/server";
+import {
+  createAdminSession,
+  COOKIE_NAME,
+} from "../../../lib/admin-auth";
 
-export async function POST(request: Request) {
+export async function POST(
+  request: Request
+) {
   try {
-    const body = await request.json();
+    const body =
+      await request.json();
 
-    const password = body?.password;
+    const password =
+      body?.password;
 
     const adminPassword =
       process.env.ADMIN_PASSWORD;
@@ -21,10 +29,14 @@ export async function POST(request: Request) {
       );
     }
 
-    if (password !== adminPassword) {
+    if (
+      password !==
+      adminPassword
+    ) {
       return NextResponse.json(
         {
-          error: "Contraseña incorrecta.",
+          error:
+            "Contraseña incorrecta.",
         },
         {
           status: 401,
@@ -32,13 +44,40 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-    });
-  } catch {
+    const session =
+      createAdminSession();
+
+    const response =
+      NextResponse.json({
+        success: true,
+      });
+
+    response.cookies.set(
+      COOKIE_NAME,
+      session,
+      {
+        httpOnly: true,
+        secure:
+          process.env.NODE_ENV ===
+          "production",
+        sameSite: "strict",
+        path: "/",
+        maxAge:
+          60 * 60 * 24,
+      }
+    );
+
+    return response;
+  } catch (error) {
+    console.error(
+      "Error en /api/admin-login:",
+      error
+    );
+
     return NextResponse.json(
       {
-        error: "Solicitud inválida.",
+        error:
+          "Solicitud inválida.",
       },
       {
         status: 400,

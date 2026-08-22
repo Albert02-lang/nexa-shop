@@ -154,7 +154,7 @@ Producto no encontrado
 return (
 
 
-<main className="min-h-screen bg-gray-50 py-28">
+<main className="min-h-screen bg-transparent py-28">
 
 
 
@@ -308,46 +308,24 @@ MXN
 
 
 
-<div className="mt-8 rounded-2xl bg-gray-50 p-5">
+<div className="mt-8 rounded-2xl bg-gray-50 p-5 dark:bg-slate-800">
+  <h3 className="font-bold text-slate-900 dark:text-white">
+    Características
+  </h3>
 
+  <p className="mt-3 text-slate-700 dark:text-slate-200">
+    👕 Talla:
+    <span className="ml-2 font-bold text-slate-900 dark:text-white">
+      {product.size}
+    </span>
+  </p>
 
-<h3 className="font-bold text-black">
-
-Características
-
-</h3>
-
-
-
-<p className="mt-3">
-
-👕 Talla:
-
-<span className="ml-2 font-bold">
-
-{product.size}
-
-</span>
-
-</p>
-
-
-
-
-<p className="mt-3">
-
-🎨 Color:
-
-<span className="ml-2 font-bold">
-
-{product.colors?.[0] ?? "Variado"}
-
-</span>
-
-</p>
-
-
-
+  <p className="mt-3 text-slate-700 dark:text-slate-200">
+    🎨 Color:
+    <span className="ml-2 font-bold text-slate-900 dark:text-white">
+      {product.colors?.[0] ?? "Variado"}
+    </span>
+  </p>
 </div>
 
 
